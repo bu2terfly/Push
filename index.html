@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Push Notification Test</title>
+
+  <!-- OneSignal SDK -->
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <script>
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+      OneSignal.init({
+        appId: "1578892e-636a-4112-9397-9fa8f92b66cb",
+        notifyButton: {
+          enable: true
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Push Notification Test</h1>
+  <p>Click "Allow" when prompted to receive notifications.</p>
+</body>
+</html>
