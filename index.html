@@ -3,24 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Push Notification Test</title>
+  <title>Internship Program – Notifications</title>
 
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <!-- OneSignal SDK v16 -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(function() {
-      OneSignal.init({
-        appId: "1578892e-636a-4112-9397-9fa8f92b66cb",
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+      await OneSignal.init({
+        appId: "ad181aea-d590-494e-9a49-fcb5d8bf4ade",
         notifyButton: {
-          enable: true
+          enable: false // We are using our own button
         }
       });
+
+      // Store OneSignal object globally so the button can access it
+      window.OneSignalInstance = OneSignal;
     });
   </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #1f1c2c, #928dab);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      max-width: 600px;
+    }
+
+    button {
+      background-color: #ffffff;
+      color: #1f1c2c;
+      font-size: 1.1rem;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+  </style>
 </head>
 <body>
-  <h1>Push Notification Test</h1>
-  <p>Click "Allow" when prompted to receive notifications.</p>
+  <h1>Internship Program 2025</h1>
+  <p>Stay updated with internship openings, deadlines, and updates. Click the button below to enable notifications.</p>
+  <button onclick="subscribeToNotifications()">Get Notifications</button>
+
+  <script>
+    async function subscribeToNotifications() {
+      if (window.OneSignalInstance) {
+        await window.OneSignalInstance.showSlidedownPrompt();
+      } else {
+        alert("OneSignal is not ready yet. Please try again in a moment.");
+      }
+    }
+  </script>
 </body>
 </html>
