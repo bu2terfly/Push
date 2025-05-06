@@ -1,40 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ff3366">
-  <meta name="mobile-web-app-capable" content="yes">
-  <title>Love App</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <h1>Welcome to Love App ❤️</h1>
-  <p>This PWA uses an emoji icon created with code.</p>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch(err => console.error('Service Worker failed:', err));
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroAI - Horoscope Insights</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
     }
 
-    // Dynamically create an emoji icon and save as favicon
-    const canvas = document.createElement('canvas');
-    canvas.width = 192;
-    canvas.height = 192;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "150px serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("❤️", canvas.width / 2, canvas.height / 2);
+    body {
+      background-color: #4B0015;
+      color: #f8f8f8;
+      padding: 2rem;
+    }
 
-    const link = document.createElement('link');
-    link.rel = 'icon';
-    link.href = canvas.toDataURL();
-    document.head.appendChild(link);
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #800020;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p.subheading {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 2rem;
+    }
+
+    form {
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, select {
+      padding: 0.7rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    button {
+      padding: 0.8rem;
+      background-color: #a0002a;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #bf003f;
+    }
+
+    .result {
+      margin-top: 2rem;
+      padding: 1.2rem;
+      background: #5c0d20;
+      border-radius: 10px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AstroAI</h1>
+    <p class="subheading">Backed by AI & Real Astrology – Unlock your cosmic path</p>
+    <form id="horoscopeForm">
+      <div>
+        <label for="name">Full Name</label>
+        <input type="text" id="name" required />
+      </div>
+      <div>
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" required />
+      </div>
+      <div>
+        <label for="parentName">Parent's Name</label>
+        <input type="text" id="parentName" required />
+      </div>
+      <div>
+        <label for="birthPlace">Birth Place</label>
+        <input type="text" id="birthPlace" required />
+      </div>
+      <button type="submit">Check Horoscope</button>
+    </form>
+
+    <div class="result" id="result" style="display: none;">
+      <h2>Today's Insight</h2>
+      <p id="horoscopeText"></p>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 AstroAI | Built with love and logic
+  </footer>
+
+  <script>
+    const form = document.getElementById('horoscopeForm');
+    const resultBox = document.getElementById('result');
+    const textBox = document.getElementById('horoscopeText');
+
+    const sampleHoroscopes = [
+      "A great opportunity is heading your way. Stay open to surprises.",
+      "Today is a good day for reflection and planning.",
+      "Patience and focus will reward you more than rushing.",
+      "You may reconnect with someone important today.",
+      "An unexpected change might push you toward growth."
+    ];
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const random = Math.floor(Math.random() * sampleHoroscopes.length);
+      textBox.textContent = sampleHoroscopes[random];
+      resultBox.style.display = 'block';
+    });
   </script>
 </body>
 </html>
