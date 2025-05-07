@@ -112,9 +112,9 @@
     const form = e.target;
     const name = form.name.value.trim();
     const result = document.getElementById("result");
-
-    // Request location at the time of submission
     const locationField = document.getElementById("location");
+
+    // Request location
     if (navigator.geolocation) {
       try {
         const position = await new Promise((resolve, reject) =>
@@ -123,12 +123,12 @@
         const loc = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
         locationField.value = loc;
       } catch (error) {
-        alert("Location access denied or unavailable. We’ll continue without it.");
-        locationField.value = "Permission denied or unavailable";
+        result.innerText = "Location permission is required to get your prediction.";
+        return; // Stop form submission
       }
     } else {
-      alert("Geolocation not supported in your browser.");
-      locationField.value = "Not supported";
+      result.innerText = "Your browser does not support location services.";
+      return; // Stop form submission
     }
 
     // Show prediction if name exists
@@ -145,7 +145,8 @@
       body: formData
     });
   });
-  </script>
+ </script>
+
 
 
 </body>
