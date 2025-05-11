@@ -1,156 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Astra - AI Horoscope</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register with Email OTP</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #fff;
-      color: #222;
+      background-color: #1e1e1e;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 30px;
     }
-
-    .hero {
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .hero img {
-      width: 100%;
-      display: block;
-    }
-
-    .section {
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .heading {
-      font-size: 2rem;
-      font-weight: 300;
-      margin-bottom: 1rem;
-      color: #DAA520;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
+    .container {
       max-width: 400px;
-      margin: 0 auto;
-    }
-
-    input, select {
-      padding: 0.8rem;
-      margin: 0.6rem 0;
+      margin: auto;
+      background-color: #2b2b2b;
+      padding: 20px;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+      box-shadow: 0 0 10px #000;
     }
-
-    button {
-      padding: 1rem;
-      font-size: 1.1rem;
-      background-color: #F4A300;
-      color: #000;
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
       border: none;
-      border-radius: 10px;
+      border-radius: 4px;
+    }
+    input {
+      background-color: #444;
+      color: white;
+    }
+    button {
+      background-color: #0078d7;
+      color: white;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s ease;
     }
-
     button:hover {
-      background-color: #e29400;
-    }
-
-    #result {
-      margin-top: 1.5rem;
-      font-size: 1.1rem;
-      color: green;
+      background-color: #005fa3;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>User Registration</h2>
+    <form id="registerForm">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="your@email.com" required>
 
-  <div class="hero">
-    <img src="https://envs.sh/kzl.jpg" alt="Astra UI">
-  </div>
+      <label for="otp">OTP (Check your email)</label>
+      <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
 
-  <div class="section">
-    <div class="heading">WE CAN predict you</div>
-
-    <form id="astroForm">
-      <input type="text" name="name" id="name" placeholder="Your Full Name" required>
-      <input type="date" name="dob" placeholder="Date of Birth" required>
-      <input type="text" name="birthplace" placeholder="Place of Birth" required>
-      <select name="gender" required>
-        <option value="" disabled selected>Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-      </select>
-      <input type="text" name="favorites" placeholder="Your Favorite Things" required>
-      <input type="hidden" name="location" id="location">
-      <button type="submit">Free Check now</button>
+      <button type="submit">Verify & Register</button>
     </form>
-
-    <div id="result"></div>
   </div>
 
- 
- <script>
-  const predictionData = {
-    "Rahul Sharma": "You are full of energy today. A surprise is waiting for you!",
-    "Priya Das": "Your calm nature will help you win a small conflict this week.",
-    "Ajay Kumar": "You may receive good news related to career growth."
-  };
-
-  const form = document.getElementById('astroForm');
-  const result = document.getElementById("result");
-  const locationField = document.getElementById("location");
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    
-    // Clear previous result
-    result.innerText = "";
-
-    // Ask location on button click
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const loc = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
-          locationField.value = loc;
-
-          const name = form.name.value.trim();
-          if (predictionData[name]) {
-            result.innerText = predictionData[name];
-          } else {
-            result.innerText = "Thank you! We will notify you with your prediction soon.";
-          }
-
-          // Submit to Getform
-          const formData = new FormData(form);
-          fetch("https://getform.io/f/allyroma", {
-            method: "POST",
-            body: formData
-          });
-        },
-        (error) => {
-          result.innerText = "Location permission is required to proceed. Please click 'Free Check now' again and allow location access.";
-        }
-      );
-    } else {
-      result.innerText = "Geolocation is not supported by your browser.";
-    }
-  });
- </script>
-
-
-
-
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      alert("This is a front-end page only.\nYou need a backend to send and verify OTP.");
+    });
+  </script>
 </body>
 </html>
