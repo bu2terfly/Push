@@ -2,62 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Register with Email OTP</title>
+  <title>2-Person Chat</title>
   <style>
     body {
-      background-color: #1e1e1e;
-      color: white;
       font-family: Arial, sans-serif;
-      padding: 30px;
+      background: #1e1e1e;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    .container {
-      max-width: 400px;
-      margin: auto;
-      background-color: #2b2b2b;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px #000;
+    .chat-box {
+      width: 400px;
+      background: #2c2c2c;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
     }
-    input, button {
-      width: 100%;
+    .messages {
+      flex: 1;
       padding: 10px;
-      margin-top: 12px;
-      border: none;
-      border-radius: 4px;
+      overflow-y: auto;
+      max-height: 400px;
     }
-    input {
-      background-color: #444;
+    .messages p {
+      background: #3a3a3a;
+      padding: 8px;
+      border-radius: 6px;
+      margin: 5px 0;
+    }
+    .input-box {
+      display: flex;
+      border-top: 1px solid #444;
+    }
+    .input-box input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      background: #1e1e1e;
       color: white;
     }
-    button {
-      background-color: #0078d7;
+    .input-box button {
+      padding: 10px 15px;
+      border: none;
+      background: #4caf50;
       color: white;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #005fa3;
+    .input-box button:hover {
+      background: #45a049;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>User Registration</h2>
-    <form id="registerForm">
-      <label for="email">Email Address</label>
-      <input type="email" id="email" name="email" placeholder="your@email.com" required>
-
-      <label for="otp">OTP (Check your email)</label>
-      <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
-
-      <button type="submit">Verify & Register</button>
-    </form>
+  <div class="chat-box">
+    <div class="messages" id="messages"></div>
+    <div class="input-box">
+      <input id="msgInput" placeholder="Type a message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
   <script>
-    document.getElementById("registerForm").addEventListener("submit", function(event) {
-      event.preventDefault();
-      alert("This is a front-end page only.\nYou need a backend to send and verify OTP.");
+    // 🔑 Your Firebase project config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1a5LsA3mfDBjDqkaRMtGHVDiRtsVkZ8A",
+      authDomain: "time-55409.firebaseapp.com",
+      databaseURL: "https://time-55409-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "time-55409",
+      storageBucket: "time-55409.appspot.com",
+      messagingSenderId: "333126753000",
+      appId: "1:333126753000:web:526af491700dc6aba9c75d",
+      measurementId: "G-8XYVNF2NK1"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const messagesDiv = document.getElementById("messages");
+    const msgInput = document.getElementById("msgInput");
+
+    function sendMessage() {
+      const msg = msgInput.value.trim();
+      if (msg) {
+        db.ref("messages").push({
+          text: msg,
+          time: Date.now()
+        });
+        msgInput.value = "";
+      }
+    }
+
+    db.ref("messages").on("child_added", snapshot => {
+      const data = snapshot.val();
+      const p = document.createElement("p");
+      p.textContent = data.text;
+      messagesDiv.appendChild(p);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
   </script>
 </body>
