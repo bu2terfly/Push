@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>College Routine Demo</title>
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, set, push, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyVWf_fLoI_HwG5F2NYt5uE9R2cG4hgaU",
+      authDomain: "project1-2cf89.firebaseapp.com",
+      databaseURL: "https://project1-2cf89-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "project1-2cf89",
+      storageBucket: "project1-2cf89.firebasestorage.app",
+      messagingSenderId: "402123727736",
+      appId: "1:402123727736:web:28171277785a809dd55e8d"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ================== ADMIN PANEL ===================
+    document.getElementById("saveRoutine").addEventListener("click", async () => {
+      const course = document.getElementById("course").value;
+      const section = document.getElementById("section").value;
+      const day = document.getElementById("day").value;
+      const subject = document.getElementById("subject").value;
+      const teacher = document.getElementById("teacher").value;
+      const time = document.getElementById("time").value;
+
+      if (!course || !section || !day || !subject || !teacher || !time) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      const newRef = push(ref(db, `routines/${course}/${section}/${day}`));
+      await set(newRef, { subject, teacher, time });
+
+      alert("Routine added successfully ✅");
+    });
+
+    // ================== STUDENT PANEL ===================
+    document.getElementById("fetchRoutine").addEventListener("click", async () => {
+      const course = document.getElementById("studentCourse").value;
+      const section = document.getElementById("studentSection").value;
+      const day = document.getElementById("studentDay").value;
+
+      const dbRef = ref(db);
+      const snapshot = await get(child(dbRef, `routines/${course}/${section}/${day}`));
+
+      const output = document.getElementById("routineDisplay");
+      output.innerHTML = "";
+
+      if (snapshot.exists()) {
+        snapshot.forEach(item => {
+          const data = item.val();
+          const div = document.createElement("div");
+          div.style.border = "1px solid #ccc";
+          div.style.margin = "5px";
+          div.style.padding = "10px";
+          div.style.borderRadius = "6px";
+          div.innerHTML = `<b>${data.subject}</b> (${data.teacher})<br><small>${data.time}</small>`;
+          output.appendChild(div);
+        });
+      } else {
+        output.innerHTML = "<p>No routine found ❌</p>";
+      }
+    });
+
+  </script>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 20px;">
+
+  <h2>📌 Admin Panel - Add Routine</h2>
+  <label>Course: <input id="course" placeholder="BCom / BA / BBA"></label><br>
+  <label>Section: <input id="section" placeholder="A / B"></label><br>
+  <label>Day: <input id="day" placeholder="Monday / Tuesday"></label><br>
+  <label>Subject: <input id="subject"></label><br>
+  <label>Teacher: <input id="teacher"></label><br>
+  <label>Time: <input id="time" placeholder="9:00 - 10:00"></label><br>
+  <button id="saveRoutine">💾 Save Routine</button>
+
+  <hr>
+
+  <h2>👩‍🎓 Student Panel - View Routine</h2>
+  <label>Course: <input id="studentCourse"></label><br>
+  <label>Section: <input id="studentSection"></label><br>
+  <label>Day: <input id="studentDay"></label><br>
+  <button id="fetchRoutine">📅 Show Routine</button>
+
+  <div id="routineDisplay" style="margin-top:20px;"></div>
+
+</body>
+</html>
