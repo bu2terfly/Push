@@ -745,404 +745,19 @@
         </div>
     </div>
 
+<!-- Add these script tags BEFORE your existing JavaScript -->
+    <!-- Firebase CDN Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
     <script>
         // Application state
         let currentUser = null;
         let attendanceStats = null;
         let todayClasses = [];
 
-        // Mock data
-        const mockSubjects = [
-            { id: 1, name: "Mathematics", code: "MATH101" },
-            { id: 2, name: "Physics", code: "PHY101" },
-            { id: 3, name: "Chemistry", code: "CHEM101" },
-            { id: 4, name: "Computer Science", code: "CS101" },
-            { id: 5, name: "English", code: "ENG101" }
-        ];
-
-        const mockTodayClasses = [
-            { id: 1, subject: "Mathematics", time: "09:00-10:00", room: "Room 101" },
-            { id: 2, subject: "Physics", time: "10:00-11:00", room: "Room 102" },
-            { id: 3, subject: "Chemistry", time: "11:30-12:30", room: "Lab 1" },
-            { id: 4, subject: "Computer Science", time: "14:00-15:00", room: "Lab 2" }
-        ];
-
-        const mockStats = {
-            overall: 85,
-            subjects: [
-                { name: "Mathematics", attended: 45, total: 52, percentage: 86.5 },
-                { name: "Physics", attended: 38, total: 48, percentage: 79.2 },
-                { name: "Chemistry", attended: 42, total: 50, percentage: 84.0 },
-                { name: "Computer Science", attended: 47, total: 50, percentage: 94.0 },
-                { name: "English", attended: 35, total: 40, percentage: 87.5 }
-            ]
-        };
-
-        // DOM Elements
-        const screens = {
-            login: document.getElementById('loginScreen'),
-            signup: document.getElementById('signupScreen'),
-            setup: document.getElementById('setupScreen'),
-            dashboard: document.getElementById('dashboard')
-        };
-
-        // Utility functions
-        function showScreen(screenName) {
-            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-            screens[screenName].classList.remove('hidden');
-        }
-
-        function getRemarkMessage(percentage) {
-            if (percentage >= 90) return "Excellent attendance! Keep it up! 🎉";
-            if (percentage >= 80) return "Good attendance. Stay consistent! 👍";
-            if (percentage >= 75) return "You're on track. Try to improve a bit more! 📈";
-            if (percentage >= 65) return "Below average. Need to attend more classes! ⚠️";
-            return "Critical! Your attendance is very low. Please attend regularly! 🚨";
-        }
-
-        // Authentication functions
-        function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-
-            // Mock login - in real app, this would connect to Firebase
-            currentUser = {
-                id: 1,
-                name: "John Doe",
-                email: email,
-                class: "2nd Year",
-                section: "A",
-                rollNo: "2021001",
-                dob: "2003-01-01"
-            };
-
-            loadDashboardData();
-            showScreen('dashboard');
-        }
-
-        function handleSignup() {
-            const name = document.getElementById('signupName').value;
-            const className = document.getElementById('signupClass').value;
-            const section = document.getElementById('signupSection').value;
-            const rollNo = document.getElementById('signupRoll').value;
-            const dob = document.getElementById('signupDob').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-
-            if (!name || !className || !section || !rollNo || !dob || !email || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-
-            // Store signup data temporarily
-            window.signupData = { name, class: className, section, rollNo, dob, email, password };
-            
-            // Show setup screen with subjects
-            showSetupScreen();
-            showScreen('setup');
-        }
-
-        function showSetupScreen() {
-            const container = document.getElementById('subjectsContainer');
-            container.innerHTML = '';
-
-            mockSubjects.forEach((subject, index) => {
-                const subjectDiv = document.createElement('div');
-                subjectDiv.style.cssText = 'border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;';
-                
-                subjectDiv.innerHTML = `
-                    <h3 style="font-weight: 600; color: #111827; margin-bottom: 0.75rem;">${subject.name} (${subject.code})</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">Total Classes</label>
-                            <input type="number" id="total_${subject.id}" min="0" value="0" class="form-input">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">Attended Classes</label>
-                            <input type="number" id="attended_${subject.id}" min="0" value="0" class="form-input">
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(subjectDiv);
-            });
-        }
-
-        function handleSetupComplete() {
-            const setupData = [];
-            
-            mockSubjects.forEach(subject => {
-                const total = parseInt(document.getElementById(`total_${subject.id}`).value) || 0;
-                const attended = parseInt(document.getElementById(`attended_${subject.id}`).value) || 0;
-                
-                setupData.push({
-                    ...subject,
-                    total,
-                    attended
-                });
-            });
-
-            // Create user account with setup data
-            currentUser = {
-                id: Date.now(),
-                ...window.signupData,
-                subjects: setupData
-            };
-
-            // In real app, save to Firebase here
-            console.log('User created:', currentUser);
-
-            loadDashboardData();
-            showScreen('dashboard');
-        }
-
-        // Dashboard functions
-        function loadDashboardData() {
-            // Load today's classes
-            todayClasses = mockTodayClasses;
-            
-            // Load attendance stats
-            attendanceStats = mockStats;
-            
-            // Update dashboard UI
-            updateDashboardUI();
-        }
-
-        function updateDashboardUI() {
-            // Update greeting
-            document.getElementById('greetingTitle').textContent = `Hello, ${currentUser.name}! 👋`;
-            document.getElementById('greetingRemark').textContent = getRemarkMessage(attendanceStats.overall);
-
-            // Update today's classes
-            renderTodayClasses();
-
-            // Update attendance stats
-            renderAttendanceStats();
-
-            // Update date inputs
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateTo').value = today;
-        }
-
-        function renderTodayClasses() {
-            const container = document.getElementById('todayClasses');
-            container.innerHTML = '';
-
-            todayClasses.forEach(classItem => {
-                const classDiv = document.createElement('div');
-                classDiv.className = 'class-card';
-                
-                classDiv.innerHTML = `
-                    <h4>${classItem.subject}</h4>
-                    <div class="class-info">
-                        <div class="class-info-item">
-                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            ${classItem.time}
-                        </div>
-                        <div class="class-info-item">
-                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            ${classItem.room}
-                        </div>
-                    </div>
-                    <div class="class-actions">
-                        <button class="btn-action btn-attended" onclick="handleAttendanceAction(${classItem.id}, 'attended')">Attended</button>
-                        <button class="btn-action btn-skipped" onclick="handleAttendanceAction(${classItem.id}, 'skipped')">Skipped</button>
-                        <button class="btn-action btn-not-held" onclick="handleAttendanceAction(${classItem.id}, 'not_held')">Not Held</button>
-                    </div>
-                `;
-                
-                container.appendChild(classDiv);
-            });
-        }
-
-        function renderAttendanceStats() {
-            // Overall percentage
-            document.getElementById('overallPercentage').textContent = `${attendanceStats.overall}%`;
-
-            // Subject stats
-            const container = document.getElementById('subjectStats');
-            container.innerHTML = '';
-
-            attendanceStats.subjects.forEach(subject => {
-                const subjectDiv = document.createElement('div');
-                subjectDiv.className = 'subject-card';
-                
-                const isGood = subject.percentage >= 75;
-                
-                subjectDiv.innerHTML = `
-                    <div class="subject-header">
-                        <div class="subject-name">${subject.name}</div>
-                        <div class="subject-percentage ${isGood ? 'good' : 'poor'}">${subject.percentage}%</div>
-                    </div>
-                    <div class="subject-details">
-                        <span>Attended: ${subject.attended}</span>
-                        <span>Total: ${subject.total}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill ${isGood ? 'good' : 'poor'}" style="width: ${subject.percentage}%"></div>
-                    </div>
-                `;
-                
-                container.appendChild(subjectDiv);
-            });
-        }
-
-        function handleAttendanceAction(classId, action) {
-            console.log(`Attendance action: ${action} for class ${classId}`);
-            
-            // In real app, this would save to Firebase
-            // For now, just show a confirmation
-            const actionText = action === 'attended' ? 'Attended' : 
-                             action === 'skipped' ? 'Skipped' : 'Not Held';
-            
-            // Find the class
-            const classItem = todayClasses.find(c => c.id === classId);
-            if (classItem) {
-                alert(`Marked "${classItem.subject}" as ${actionText}`);
-            }
-            
-            // Here you would update the stats and re-render
-            // loadDashboardData();
-        }
-
-        function handleSearch() {
-            const query = document.getElementById('searchInput').value.trim();
-            const resultDiv = document.getElementById('searchResult');
-            
-            if (!query) {
-                resultDiv.classList.add('hidden');
-                return;
-            }
-
-            // Mock search - in real app, this would query Firebase
-            const mockResult = {
-                name: "Jane Smith",
-                overall: 92
-            };
-
-            resultDiv.innerHTML = `
-                <p style="font-weight: 500;">${mockResult.name}</p>
-                <p style="font-size: 0.875rem; color: #6b7280;">Overall Attendance: ${mockResult.overall}%</p>
-            `;
-            resultDiv.classList.remove('hidden');
-        }
-
-        function showProfile() {
-            const modal = document.getElementById('profileModal');
-            const profileInfo = document.getElementById('profileInfo');
-            
-            profileInfo.innerHTML = `
-                <p><strong>Name:</strong> ${currentUser.name}</p>
-                <p><strong>Email:</strong> ${currentUser.email}</p>
-                <p><strong>Class:</strong> ${currentUser.class}</p>
-                <p><strong>Section:</strong> ${currentUser.section}</p>
-                <p><strong>Roll No:</strong> ${currentUser.rollNo}</p>
-            `;
-            
-            modal.classList.remove('hidden');
-        }
-
-        function hideProfile() {
-            document.getElementById('profileModal').classList.add('hidden');
-        }
-
-        function handleLogout() {
-            currentUser = null;
-            attendanceStats = null;
-            todayClasses = [];
-            
-            // Clear forms
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResult').classList.add('hidden');
-            
-            showScreen('login');
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Login/Signup navigation
-            document.getElementById('showSignup').addEventListener('click', () => showScreen('signup'));
-            document.getElementById('showLogin').addEventListener('click', () => showScreen('login'));
-
-            // Form submissions
-            document.getElementById('loginBtn').addEventListener('click', handleLogin);
-            document.getElementById('signupBtn').addEventListener('click', handleSignup);
-            document.getElementById('completeSetup').addEventListener('click', handleSetupComplete);
-
-            // Dashboard actions
-            document.getElementById('searchBtn').addEventListener('click', handleSearch);
-            document.getElementById('profileBtn').addEventListener('click', showProfile);
-            document.getElementById('closeProfile').addEventListener('click', hideProfile);
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-
-            // Search on Enter key
-            document.getElementById('searchInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleSearch();
-                }
-            });
-
-            // Login on Enter key
-            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
-
-            // Date range change handlers
-            document.getElementById('dateFrom').addEventListener('change', function() {
-                // In real app, this would filter attendance data
-                console.log('Date range changed');
-            });
-            
-            document.getElementById('dateTo').addEventListener('change', function() {
-                // In real app, this would filter attendance data
-                console.log('Date range changed');
-            });
-// Close modal on click outside
-            document.getElementById('profileModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    hideProfile();
-                }
-            });
-        });
-
-        // Firebase Configuration and Initialization
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            getDocs, 
-            doc,
-            setDoc,
-            getDoc,
-            query, 
-            where,
-            orderBy,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
-        // Your Firebase configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBSkS1RgEpPzFj5b2zjpLGaaao0nt1xEaU",
             authDomain: "attendance-871bf.firebaseapp.com",
@@ -1153,11 +768,11 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
-        // Test timetable data - this will later come from admin panel
+        // Test timetable data
         const testTimetableData = {
             "2nd Year": {
                 "A": {
@@ -1221,38 +836,62 @@
             }
         };
 
-        // Initialize test data in Firestore (run once)
+        // DOM Elements
+        const screens = {
+            login: document.getElementById('loginScreen'),
+            signup: document.getElementById('signupScreen'),
+            setup: document.getElementById('setupScreen'),
+            dashboard: document.getElementById('dashboard')
+        };
+
+        // Utility functions
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+            screens[screenName].classList.remove('hidden');
+        }
+
+        function getRemarkMessage(percentage) {
+            if (percentage >= 90) return "Excellent attendance! Keep it up! 🎉";
+            if (percentage >= 80) return "Good attendance. Stay consistent! 👍";
+            if (percentage >= 75) return "You're on track. Try to improve a bit more! 📈";
+            if (percentage >= 65) return "Below average. Need to attend more classes! ⚠️";
+            return "Critical! Your attendance is very low. Please attend regularly! 🚨";
+        }
+
+        // Initialize test data in Firestore
         async function initializeTestData() {
             try {
-                await setDoc(doc(db, "timetable", "data"), testTimetableData);
+                await db.collection('timetable').doc('data').set(testTimetableData);
                 console.log("Test timetable data initialized");
             } catch (error) {
                 console.error("Error initializing test data:", error);
             }
         }
 
-        // Firebase Authentication Functions
+        // Firebase Functions
         async function createUserInFirebase(userData) {
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+                const userCredential = await auth.createUserWithEmailAndPassword(userData.email, userData.password);
                 const user = userCredential.user;
                 
                 // Create user document in Firestore
-                await setDoc(doc(db, "users", user.uid), {
+                await db.collection('users').doc(user.uid).set({
                     name: userData.name,
                     class: userData.class,
                     section: userData.section,
                     rollNo: userData.rollNo,
                     dob: userData.dob,
                     email: userData.email,
-                    createdAt: serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 // Save initial subject setup
                 if (userData.subjects && userData.subjects.length > 0) {
-                    for (const subject of userData.subjects) {
+                    const batch = db.batch();
+                    userData.subjects.forEach(subject => {
                         if (subject.total > 0 || subject.attended > 0) {
-                            await addDoc(collection(db, "attendance"), {
+                            const attendanceRef = db.collection('attendance').doc();
+                            batch.set(attendanceRef, {
                                 userId: user.uid,
                                 subject: subject.name,
                                 subjectCode: subject.code,
@@ -1260,10 +899,11 @@
                                 totalClasses: subject.total,
                                 attendedClasses: subject.attended,
                                 date: new Date().toISOString().split('T')[0],
-                                timestamp: serverTimestamp()
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
                             });
                         }
-                    }
+                    });
+                    await batch.commit();
                 }
                 
                 return user;
@@ -1275,7 +915,7 @@
 
         async function signInUserWithFirebase(email, password) {
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 return userCredential.user;
             } catch (error) {
                 console.error("Error signing in:", error);
@@ -1285,8 +925,8 @@
 
         async function getUserData(uid) {
             try {
-                const userDoc = await getDoc(doc(db, "users", uid));
-                if (userDoc.exists()) {
+                const userDoc = await db.collection('users').doc(uid).get();
+                if (userDoc.exists) {
                     return { id: uid, ...userDoc.data() };
                 } else {
                     throw new Error("User not found");
@@ -1299,8 +939,8 @@
 
         async function getTimetableData(className, section) {
             try {
-                const timetableDoc = await getDoc(doc(db, "timetable", "data"));
-                if (timetableDoc.exists()) {
+                const timetableDoc = await db.collection('timetable').doc('data').get();
+                if (timetableDoc.exists) {
                     const data = timetableDoc.data();
                     return data[className]?.[section] || null;
                 }
@@ -1334,14 +974,14 @@
 
         async function saveAttendanceToFirebase(userId, classData, action) {
             try {
-                await addDoc(collection(db, "attendance"), {
+                await db.collection('attendance').add({
                     userId: userId,
                     subject: classData.subject,
                     action: action,
                     classTime: classData.time,
                     room: classData.room,
                     date: new Date().toISOString().split('T')[0],
-                    timestamp: serverTimestamp()
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 console.log("Attendance saved successfully");
             } catch (error) {
@@ -1352,23 +992,19 @@
 
         async function getAttendanceStats(userId) {
             try {
-                const attendanceQuery = query(
-                    collection(db, "attendance"), 
-                    where("userId", "==", userId),
-                    orderBy("timestamp", "desc")
-                );
+                const attendanceQuery = await db.collection('attendance')
+                    .where('userId', '==', userId)
+                    .orderBy('timestamp', 'desc')
+                    .get();
                 
-                const querySnapshot = await getDocs(attendanceQuery);
                 const attendanceRecords = [];
-                
-                querySnapshot.forEach((doc) => {
+                attendanceQuery.forEach((doc) => {
                     attendanceRecords.push(doc.data());
                 });
 
                 return calculateAttendanceStats(attendanceRecords);
             } catch (error) {
                 console.error("Error getting attendance stats:", error);
-                // Return mock data if error occurs
                 return {
                     overall: 0,
                     subjects: []
@@ -1397,7 +1033,6 @@
                 } else if (record.action === 'skipped') {
                     subjectStats[record.subject].total += 1;
                 }
-                // 'not_held' doesn't affect stats
             });
 
             const subjects = Object.values(subjectStats).map(subject => ({
@@ -1417,11 +1052,10 @@
 
         async function searchUserByName(searchName) {
             try {
-                const usersQuery = query(collection(db, "users"));
-                const querySnapshot = await getDocs(usersQuery);
+                const usersQuery = await db.collection('users').get();
                 
                 let foundUser = null;
-                querySnapshot.forEach((doc) => {
+                usersQuery.forEach((doc) => {
                     const userData = doc.data();
                     if (userData.name.toLowerCase().includes(searchName.toLowerCase())) {
                         foundUser = { id: doc.id, ...userData };
@@ -1442,7 +1076,7 @@
             }
         }
 
-        // Update existing functions to use Firebase
+        // Event Handlers
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
@@ -1452,8 +1086,9 @@
                 return;
             }
 
-            document.getElementById('loginBtn').disabled = true;
-            document.getElementById('loginBtn').textContent = 'Signing in...';
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
 
             try {
                 const user = await signInUserWithFirebase(email, password);
@@ -1466,8 +1101,8 @@
                 alert('Login failed: ' + error.message);
             }
 
-            document.getElementById('loginBtn').disabled = false;
-            document.getElementById('loginBtn').textContent = 'Sign In';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
         }
 
         async function handleSignup() {
@@ -1484,18 +1119,19 @@
                 return;
             }
 
-            document.getElementById('signupBtn').disabled = true;
-            document.getElementById('signupBtn').textContent = 'Creating...';
+            const signupBtn = document.getElementById('signupBtn');
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Loading...';
 
             try {
-                // Get subjects for the selected class
                 const timetableData = await getTimetableData(className, section);
                 if (!timetableData) {
                     alert('Timetable not found for selected class and section');
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Next: Setup Subjects';
                     return;
                 }
 
-                // Store signup data temporarily
                 window.signupData = { 
                     name, 
                     class: className, 
@@ -1513,8 +1149,8 @@
                 alert('Signup failed: ' + error.message);
             }
 
-            document.getElementById('signupBtn').disabled = false;
-            document.getElementById('signupBtn').textContent = 'Next: Setup Subjects';
+            signupBtn.disabled = false;
+            signupBtn.textContent = 'Next: Setup Subjects';
         }
 
         function showSetupScreen(subjects) {
@@ -1557,11 +1193,11 @@
                 });
             });
 
-            document.getElementById('completeSetup').disabled = true;
-            document.getElementById('completeSetup').textContent = 'Setting up...';
+            const completeBtn = document.getElementById('completeSetup');
+            completeBtn.disabled = true;
+            completeBtn.textContent = 'Setting up...';
 
             try {
-                // Create user account with Firebase
                 const user = await createUserInFirebase({
                     ...window.signupData,
                     subjects: setupData
@@ -1576,23 +1212,98 @@
                 alert('Setup failed: ' + error.message);
             }
 
-            document.getElementById('completeSetup').disabled = false;
-            document.getElementById('completeSetup').textContent = 'Complete Setup';
+            completeBtn.disabled = false;
+            completeBtn.textContent = 'Complete Setup';
         }
 
         async function loadDashboardData() {
             try {
-                // Load today's classes
                 todayClasses = await getTodayClasses(currentUser.class, currentUser.section);
-                
-                // Load attendance stats
                 attendanceStats = await getAttendanceStats(currentUser.id);
-                
-                // Update dashboard UI
                 updateDashboardUI();
             } catch (error) {
                 console.error("Error loading dashboard data:", error);
             }
+        }
+
+        function updateDashboardUI() {
+            document.getElementById('greetingTitle').textContent = `Hello, ${currentUser.name}! 👋`;
+            document.getElementById('greetingRemark').textContent = getRemarkMessage(attendanceStats.overall);
+            renderTodayClasses();
+            renderAttendanceStats();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateTo').value = today;
+        }
+
+        function renderTodayClasses() {
+            const container = document.getElementById('todayClasses');
+            container.innerHTML = '';
+
+            if (todayClasses.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No classes scheduled for today</p>';
+                return;
+            }
+
+            todayClasses.forEach(classItem => {
+                const classDiv = document.createElement('div');
+                classDiv.className = 'class-card';
+                
+                classDiv.innerHTML = `
+                    <h4>${classItem.subject}</h4>
+                    <div class="class-info">
+                        <div class="class-info-item">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            ${classItem.time}
+                        </div>
+                        <div class="class-info-item">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            ${classItem.room}
+                        </div>
+                    </div>
+                    <div class="class-actions">
+                        <button class="btn-action btn-attended" onclick="handleAttendanceAction('${classItem.id}', 'attended')">Attended</button>
+                        <button class="btn-action btn-skipped" onclick="handleAttendanceAction('${classItem.id}', 'skipped')">Skipped</button>
+                        <button class="btn-action btn-not-held" onclick="handleAttendanceAction('${classItem.id}', 'not_held')">Not Held</button>
+                    </div>
+                `;
+                
+                container.appendChild(classDiv);
+            });
+        }
+
+        function renderAttendanceStats() {
+            document.getElementById('overallPercentage').textContent = `${attendanceStats.overall}%`;
+
+            const container = document.getElementById('subjectStats');
+            container.innerHTML = '';
+
+            attendanceStats.subjects.forEach(subject => {
+                const subjectDiv = document.createElement('div');
+                subjectDiv.className = 'subject-card';
+                
+                const isGood = subject.percentage >= 75;
+                
+                subjectDiv.innerHTML = `
+                    <div class="subject-header">
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-percentage ${isGood ? 'good' : 'poor'}">${subject.percentage}%</div>
+                    </div>
+                    <div class="subject-details">
+                        <span>Attended: ${subject.attended}</span>
+                        <span>Total: ${subject.total}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${isGood ? 'good' : 'poor'}" style="width: ${subject.percentage}%"></div>
+                    </div>
+                `;
+                
+                container.appendChild(subjectDiv);
+            });
         }
 
         async function handleAttendanceAction(classId, action) {
@@ -1606,8 +1317,6 @@
                                  action === 'skipped' ? 'Skipped' : 'Not Held';
                 
                 alert(`Marked "${classItem.subject}" as ${actionText}`);
-                
-                // Reload stats
                 await loadDashboardData();
             } catch (error) {
                 console.error('Error saving attendance:', error);
@@ -1634,28 +1343,42 @@
                     `;
                     resultDiv.classList.remove('hidden');
                 } else {
-                    resultDiv.innerHTML = `
-                        <p style="color: #6b7280;">No user found with that name.</p>
-                    `;
+                    resultDiv.innerHTML = `<p style="color: #6b7280;">No user found with that name.</p>`;
                     resultDiv.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('Error searching user:', error);
-                resultDiv.innerHTML = `
-                    <p style="color: #ef4444;">Search failed. Please try again.</p>
-                `;
+                resultDiv.innerHTML = `<p style="color: #ef4444;">Search failed. Please try again.</p>`;
                 resultDiv.classList.remove('hidden');
             }
         }
 
+        function showProfile() {
+            const modal = document.getElementById('profileModal');
+            const profileInfo = document.getElementById('profileInfo');
+            
+            profileInfo.innerHTML = `
+                <p><strong>Name:</strong> ${currentUser.name}</p>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <p><strong>Class:</strong> ${currentUser.class}</p>
+                <p><strong>Section:</strong> ${currentUser.section}</p>
+                <p><strong>Roll No:</strong> ${currentUser.rollNo}</p>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function hideProfile() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
         async function handleLogout() {
             try {
-                await signOut(auth);
+                await auth.signOut();
                 currentUser = null;
                 attendanceStats = null;
                 todayClasses = [];
                 
-                // Clear forms
                 document.getElementById('loginEmail').value = '';
                 document.getElementById('loginPassword').value = '';
                 document.getElementById('searchInput').value = '';
@@ -1667,8 +1390,50 @@
             }
         }
 
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login/Signup navigation
+            document.getElementById('showSignup').addEventListener('click', () => showScreen('signup'));
+            document.getElementById('showLogin').addEventListener('click', () => showScreen('login'));
+
+            // Form submissions
+            document.getElementById('loginBtn').addEventListener('click', handleLogin);
+            document.getElementById('signupBtn').addEventListener('click', handleSignup);
+            document.getElementById('completeSetup').addEventListener('click', handleSetupComplete);
+
+            // Dashboard actions
+            document.getElementById('searchBtn').addEventListener('click', handleSearch);
+            document.getElementById('profileBtn').addEventListener('click', showProfile);
+            document.getElementById('closeProfile').addEventListener('click', hideProfile);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // Search on Enter key
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+
+            // Login on Enter key
+            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            // Close modal on click outside
+            document.getElementById('profileModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideProfile();
+                }
+            });
+
+            // Initialize test data
+            initializeTestData().catch(console.error);
+        });
+
         // Auth state listener
-        onAuthStateChanged(auth, async (user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user && !currentUser) {
                 try {
                     const userData = await getUserData(user.uid);
@@ -1684,9 +1449,6 @@
                 showScreen('login');
             }
         });
-
-        // Initialize test data when app loads (for development)
-        initializeTestData().catch(console.error);
     </script>
 </body>
 </html>
