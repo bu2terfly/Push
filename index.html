@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff6b35;
+            --primary-hover: #e55a2b;
+            --primary-light: #fff8f6;
+            --secondary: #2d3135;
+            --accent: #00d4aa;
+            --accent-hover: #00b894;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --gray-50: #f8f9fa;
+            --gray-100: #f1f3f4;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient-primary: linear-gradient(135deg, var(--primary), #ff8c42);
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            --gradient-surface: linear-gradient(135deg, rgba(255, 107, 53, 0.02), rgba(255, 140, 66, 0.01));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--secondary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            background: var(--white);
+            min-height: 100vh;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Desktop Support */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 1200px;
+                min-height: auto;
+                border-radius: 24px;
+                margin: 20px auto;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0;
+                overflow: hidden;
+            }
+            
+            .mobile-layout {
+                max-width: 420px;
+            }
+            
+            .desktop-sidebar {
+                background: var(--gradient-surface);
+                padding: 40px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .desktop-sidebar::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 100%;
+                height: 200%;
+                background: radial-gradient(ellipse at center, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+                animation: float 6s ease-in-out infinite;
+            }
+            
+            @keyframes float {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-20px) rotate(180deg); }
+            }
+            
+            .desktop-hero {
+                position: relative;
+                z-index: 2;
+                text-align: center;
+            }
+            
+            .desktop-hero h1 {
+                font-family: 'Righteous', cursive;
+                font-size: 48px;
+                background: var(--gradient-primary);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 24px;
+                letter-spacing: 0.02em;
+                transform: scaleX(1.1);
+            }
+            
+            .desktop-hero p {
+                font-size: 18px;
+                color: var(--gray-600);
+                font-weight: 500;
+                line-height: 1.6;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Enhanced Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            position: relative;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--secondary);
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .header-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: var(--gray-50);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--gray-600);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .header-btn:hover::before {
+            opacity: 0.1;
+        }
+
+        .header-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            color: var(--primary);
+        }
+
+        .header-btn.profile {
+            background: var(--gradient-primary);
+            color: var(--white);
+        }
+
+        .header-btn.profile:hover {
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        /* Auth Forms Enhanced */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--gradient-surface);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.05) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            padding: 40px 32px;
+            border: 1px solid var(--gray-200);
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 20px;
+            font-weight: 700;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-subtitle {
+            color: var(--gray-600);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Enhanced Greeting Section */
+        .greeting-section {
+            background: var(--white);
+            padding: 48px 20px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .greeting-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 200px;
+            background: radial-gradient(ellipse, rgba(255, 107, 53, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .greeting-section::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(0, 212, 170, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .greeting-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .greeting-title {
+            font-family: 'Righteous', cursive;
+            font-size: 42px;
+            color: var(--primary);
+            margin-bottom: 28px;
+            line-height: 1.1;
+            letter-spacing: 0.02em;
+            transform: scaleX(1.15) scaleY(1.2);
+            transform-origin: left center;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(255, 107, 53, 0.1);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.1); }
+        }
+
+        .tips-container {
+            margin-bottom: 24px;
+        }
+
+        .tips-pill {
+            background: var(--gradient-accent);
+            color: var(--white);
+            padding: 10px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25);
+            animation: pulse 2.5s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        .tips-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 212, 170, 0.35);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .tips-pill::before {
+            content: '💡';
+            font-size: 14px;
+            filter: brightness(1.2);
+        }
+
+        .tips-text {
+            font-size: 17px;
+            color: var(--secondary);
+            font-weight: 600;
+            line-height: 1.4;
+            max-width: 340px;
+        }
+
+        /* Enhanced Search Section */
+        .search-section {
+            background: var(--white);
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-200);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            font-size: 15px;
+            background: var(--gray-50);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .search-result {
+            margin-top: 16px;
+            padding: 20px;
+            background: var(--gradient-surface);
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Enhanced Today's Classes */
+        .section {
+            padding: 28px 20px;
+        }
+
+        .classes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .date-pill {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow-md);
+        }
+
+        .classes-carousel {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--gray-100);
+        }
+
+        .classes-carousel::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .classes-carousel::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: 4px;
+        }
+
+        .classes-carousel::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 4px;
+        }
+
+        .class-card {
+            background: var(--white);
+            border: 2px solid var(--gray-100);
+            border-radius: 20px;
+            padding: 24px;
+            min-width: 300px;
+            scroll-snap-align: start;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .class-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .class-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .class-card:hover::before {
+            opacity: 1;
+        }
+
+        .class-card h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .class-info {
+            margin-bottom: 20px;
+        }
+
+        .class-info-item {
+            color: var(--gray-600);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .class-info-item::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        .class-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-attended {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .btn-attended::before {
+            background: var(--secondary);
+        }
+
+        .btn-attended:hover {
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-attended:hover::before {
+            opacity: 1;
+        }
+
+        .btn-skipped {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-skipped::before {
+            background: var(--primary);
+        }
+
+        .btn-skipped:hover {
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-skipped:hover::before {
+            opacity: 1;
+        }
+
+        .btn-not-held {
+            color: var(--gray-600);
+            border-color: var(--gray-400);
+        }
+
+        .btn-not-held::before {
+            background: var(--gray-600);
+        }
+
+        .btn-not-held:hover {
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-not-held:hover::before {
+            opacity: 1;
+        }
+
+        /* Enhanced Statistics Section */
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 13px;
+            background: var(--gray-50);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .overall-stats {
+            background: var(--gradient-primary);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 28px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .overall-stats::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .overall-percentage {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .overall-label {
+            font-size: 16px;
+            font-weight: 600;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .subject-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .subject-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 24px;
+            border: 2px solid var(--gray-100);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .subject-card:hover::before {
+            opacity: 1;
+        }
+
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            color: var(--secondary);
+            font-size: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .subject-percentage {
+            font-size: 16px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 12px;
+        }
+
+        .subject-percentage.good {
+            color: var(--success);
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .subject-percentage.poor {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .subject-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: var(--gray-100);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-fill.good {
+            background: var(--gradient-accent);
+        }
+
+        .progress-fill.poor {
+            background: var(--gradient-primary);
+        }
+
+        /* Enhanced Forms */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: var(--gray-50);
+            font-weight: 500;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:hover:not(:disabled)::before {
+            opacity: 1;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .btn-secondary:hover {
+            color: var(--primary-hover);
+            background: var(--primary-light);
+        }
+
+        /* Enhanced Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 49, 53, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            border: 2px solid var(--gray-100);
+            box-shadow: var(--shadow-xl);
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--secondary);
+            letter-spacing: -0.01em;
+        }
+
+        .profile-info {
+            margin-bottom: 28px;
+        }
+
+        .profile-info p {
+            margin-bottom: 16px;
+            color: var(--gray-700);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .profile-info strong {
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-accent);
+            color: var(--white);
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            animation: messageSlide 0.4s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* No Class Message */
+        .no-classes {
+            padding: 48px 32px;
+            text-align: center;
+            color: var(--gray-600);
+            background: var(--gradient-surface);
+            border-radius: 20px;
+            margin: 20px;
+        }
+
+        .no-classes-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--gray-400);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .no-classes p {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+
+        .no-classes small {
+            font-size: 14px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Text utilities */
+        .text-center {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        /* Desktop specific adjustments */
+        @media (min-width: 768px) {
+            .greeting-title {
+                font-size: 56px;
+                transform: scaleX(1.2) scaleY(1.3);
+            }
+            
+            .tips-text {
+                font-size: 18px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+            
+            .stats-header {
+                flex-direction: row;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .classes-carousel {
+                padding-left: 20px;
+                margin-left: -20px;
+                margin-right: -20px;
+            }
+            
+            .class-card {
+                min-width: 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .greeting-title {
+                font-size: 36px;
+            }
+            
+            .greeting-section {
+                padding: 40px 20px 32px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .stats-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">AT</div>
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to track your attendance</p>
+            </div>
+            
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" required>
+                </div>
+                <button id="loginBtn" class="btn-primary">Sign In</button>
+            </div>
+            
+            <div class="text-center">
+                <button id="showSignup" class="btn-secondary">Don't have an account? Sign up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Screen -->
+    <div id="signupScreen" class="auth-container hidden">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">AT</div>
+                <h1 class="auth-title">Create Account</h1>
+                <p class="auth-subtitle">Join to start tracking</p>
+            </div>
+            
+            <div id="signupForm">
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="signupClass">Class</label>
+                        <select id="signupClass" class="form-input" required>
+                            <option value="">Select</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupSection">Section</label>
+                        <select id="signupSection" class="form-input" required>
+                            <option value="">Select</option>
+                            <option value="A">A</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="signupRoll">Roll No</label>
+                        <input type="text" id="signupRoll" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupDob">Date of Birth</label>
+                        <input type="date" id="signupDob" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" class="form-input" required>
+                </div>
+                <button id="signupBtn" class="btn-primary">Next: Setup Subjects</button>
+            </div>
+            
+            <div class="text-center">
+                <button id="showLogin" class="btn-secondary">Already have an account? Sign in</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Screen -->
+    <div id="setupScreen" class="auth-container hidden">
+        <div style="max-width: 500px; width: 100%;">
+            <div class="auth-card" style="max-width: none;">
+                <div class="auth-header">
+                    <div class="auth-icon">S</div>
+                    <h2 class="auth-title">Setup Subjects</h2>
+                    <p class="auth-subtitle">Enter your past attendance data</p>
+                </div>
+                
+                <div id="subjectsContainer" style="margin: 28px 0;">
+                    <!-- Subjects will be populated here -->
+                </div>
+                
+                <button id="completeSetup" class="btn-primary">Complete Setup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="container hidden">
+        <!-- Desktop Sidebar (hidden on mobile) -->
+        <div class="desktop-sidebar" style="display: none;">
+            <div class="desktop-hero">
+                <h1>Track Your Academic Journey</h1>
+                <p>Stay on top of your attendance with beautiful insights and smart recommendations.</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="mobile-layout">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo-section">
+                    <div class="logo-icon">AT</div>
+                    <div class="logo-text">Attendance Tracker</div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" onclick="toggleSearch()">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="profileBtn" class="header-btn profile">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div id="searchSection" class="search-section hidden">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search friend's attendance...">
+                </div>
+                <div id="searchResult" class="search-result hidden"></div>
+            </div>
+
+            <!-- Enhanced Greeting Section -->
+            <div class="greeting-section">
+                <div class="greeting-content">
+                    <h1 id="greetingTitle" class="greeting-title">HELLO, DEAR STUDENT</h1>
+                    <div class="tips-container">
+                        <div class="tips-pill" id="tipsPill">//Tips</div>
+                        <p id="tipsText" class="tips-text">You're regular at college... must be love, not just lectures</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Classes -->
+            <div class="section">
+                <div class="classes-header">
+                    <h3 class="section-title">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        Today's Classes
+                    </h3>
+                    <div id="todayDate" class="date-pill">12/09/25</div>
+                </div>
+                <div id="todayClasses" class="classes-carousel">
+                    <!-- Classes will be populated here -->
+                </div>
+            </div>
+
+            <!-- Attendance Statistics -->
+            <div class="section">
+                <div class="stats-header">
+                    <h3 class="section-title">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        Attendance Statistics
+                    </h3>
+                    <div class="date-range">
+                        <input type="date" id="dateFrom" class="date-input" value="2024-01-01">
+                        <span>to</span>
+                        <input type="date" id="dateTo" class="date-input">
+                    </div>
+                </div>
+
+                <!-- Overall Stats -->
+                <div class="overall-stats">
+                    <div id="overallPercentage" class="overall-percentage">64%</div>
+                    <div class="overall-label">Overall Attendance</div>
+                </div>
+
+                <!-- Subject Stats -->
+                <div id="subjectStats" class="subject-stats">
+                    <!-- Subject stats will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-header">Profile</h3>
+            <div id="profileInfo" class="profile-info">
+                <!-- Profile info will be populated here -->
+            </div>
+            <button id="closeProfile" class="btn-primary">Close</button>
+        </div>
+    </div>
+
+    <!-- Firebase CDN Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Application state
+        let currentUser = null;
+        let attendanceStats = null;
+        let todayClasses = [];
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSkS1RgEpPzFj5b2zjpLGaaao0nt1xEaU",
+            authDomain: "attendance-871bf.firebaseapp.com",
+            projectId: "attendance-871bf",
+            storageBucket: "attendance-871bf.firebasestorage.app",
+            messagingSenderId: "456598495878",
+            appId: "1:456598495878:web:a68bef1d6cb62287e06707"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Test timetable data
+        const testTimetableData = {
+            "2nd Year": {
+                "A": {
+                    subjects: [
+                        { id: 1, name: "Data Structures", code: "CS201" },
+                        { id: 2, name: "Database Management", code: "CS202" }
+                    ],
+                    schedule: {
+                        Monday: [
+                            { subject: "Data Structures", time: "09:00-10:00", room: "CS Lab 1" },
+                            { subject: "Database Management", time: "10:00-11:00", room: "Room 201" }
+                        ],
+                        Tuesday: [
+                            { subject: "Database Management", time: "09:00-10:00", room: "Room 201" },
+                            { subject: "Data Structures", time: "11:00-12:00", room: "CS Lab 1" }
+                        ],
+                        Wednesday: [
+                            { subject: "Data Structures", time: "10:00-11:00", room: "CS Lab 1" },
+                            { subject: "Database Management", time: "14:00-15:00", room: "Room 201" }
+                        ],
+                        Thursday: [
+                            { subject: "Database Management", time: "09:00-10:00", room: "Room 201" },
+                            { subject: "Data Structures", time: "15:00-16:00", room: "CS Lab 1" }
+                        ],
+                        Friday: [
+                            { subject: "Data Structures", time: "09:00-10:00", room: "CS Lab 1" },
+                            { subject: "Database Management", time: "10:00-11:00", room: "Room 201" }
+                        ],
+                        Saturday: [
+                            { subject: "Micro finance", time: "09:00-10:00", room: "CS Lab 1" },
+                            { subject: "investment banking", time: "10:00-11:00", room: "room 206" },
+                            { subject: "law Management", time: "11:00-12:00", room: "Room 201" }
+                        ]
+                    }
+                }
+            },
+            "3rd Year": {
+                "A": {
+                    subjects: [
+                        { id: 3, name: "Software Engineering", code: "CS301" },
+                        { id: 4, name: "Computer Networks", code: "CS302" }
+                    ],
+                    schedule: {
+                        Monday: [
+                            { subject: "Software Engineering", time: "09:00-10:00", room: "Room 301" },
+                            { subject: "Computer Networks", time: "11:00-12:00", room: "Network Lab" }
+                        ],
+                        Tuesday: [
+                            { subject: "Computer Networks", time: "10:00-11:00", room: "Network Lab" },
+                            { subject: "Software Engineering", time: "14:00-15:00", room: "Room 301" }
+                        ],
+                        Wednesday: [
+                            { subject: "Software Engineering", time: "09:00-10:00", room: "Room 301" },
+                            { subject: "Computer Networks", time: "10:00-11:00", room: "Network Lab" }
+                        ],
+                        Thursday: [
+                            { subject: "Computer Networks", time: "09:00-10:00", room: "Network Lab" },
+                            { subject: "Software Engineering", time: "11:00-12:00", room: "Room 301" }
+                        ],
+                        Saturday: [
+                            { subject: "Software Engineering", time: "10:00-11:00", room: "Room 301" },
+                            { subject: "Computer Networks", time: "15:00-16:00", room: "Network Lab" }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // DOM Elements
+        const screens = {
+            login: document.getElementById('loginScreen'),
+            signup: document.getElementById('signupScreen'),
+            setup: document.getElementById('setupScreen'),
+            dashboard: document.getElementById('dashboard')
+        };
+
+        // Show desktop sidebar on larger screens
+        function handleResponsiveDesign() {
+            const desktopSidebar = document.querySelector('.desktop-sidebar');
+            if (window.innerWidth >= 768) {
+                desktopSidebar.style.display = 'flex';
+            } else {
+                desktopSidebar.style.display = 'none';
+            }
+        }
+
+        // Utility functions
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+            screens[screenName].classList.remove('hidden');
+            
+            // Handle responsive design after screen change
+            setTimeout(handleResponsiveDesign, 100);
+        }
+
+        function getRemarkMessage(percentage) {
+            if (percentage >= 90) return "Excellent attendance! Keep it up!";
+            if (percentage >= 80) return "Good attendance. Stay consistent!";
+            if (percentage >= 75) return "You're on track. Try to improve a bit more!";
+            if (percentage >= 65) return "Below average. Need to attend more classes!";
+            return "Critical! Your attendance is very low. Please attend regularly!";
+        }
+
+        function getTipsMessage(percentage) {
+            if (percentage >= 90) return "You're regular at college... must be love, not just lectures";
+            if (percentage >= 80) return "You can bunk 2 days classes still attendance will be above average";
+            if (percentage >= 75) return "Maintain this pace, you're doing great!";
+            if (percentage >= 65) return "Time to attend more classes regularly";
+            return "Emergency mode! Attend every class now!";
+        }
+
+        function toggleSearch() {
+            const searchSection = document.getElementById('searchSection');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (searchSection.classList.contains('hidden')) {
+                searchSection.classList.remove('hidden');
+                searchInput.focus();
+            } else {
+                searchSection.classList.add('hidden');
+                searchInput.value = '';
+                document.getElementById('searchResult').classList.add('hidden');
+            }
+        }
+
+        function formatDate(date = new Date()) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+
+        // Initialize test data in Firestore
+        async function initializeTestData() {
+            try {
+                await db.collection('timetable').doc('data').set(testTimetableData);
+                console.log("Test timetable data initialized");
+            } catch (error) {
+                console.error("Error initializing test data:", error);
+            }
+        }
+
+        // Firebase Functions
+        async function createUserInFirebase(userData) {
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(userData.email, userData.password);
+                const user = userCredential.user;
+                
+                // Create user document in Firestore
+                await db.collection('users').doc(user.uid).set({
+                    name: userData.name,
+                    class: userData.class,
+                    section: userData.section,
+                    rollNo: userData.rollNo,
+                    dob: userData.dob,
+                    email: userData.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Save initial subject setup
+                if (userData.subjects && userData.subjects.length > 0) {
+                    const batch = db.batch();
+                    userData.subjects.forEach(subject => {
+                        if (subject.total > 0 || subject.attended > 0) {
+                            const attendanceRef = db.collection('attendance').doc();
+                            batch.set(attendanceRef, {
+                                userId: user.uid,
+                                subject: subject.name,
+                                subjectCode: subject.code,
+                                action: 'initial_setup',
+                                totalClasses: subject.total,
+                                attendedClasses: subject.attended,
+                                date: new Date().toISOString().split('T')[0],
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    });
+                    await batch.commit();
+                }
+                
+                return user;
+            } catch (error) {
+                console.error("Error creating user:", error);
+                throw error;
+            }
+        }
+
+        async function signInUserWithFirebase(email, password) {
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                return userCredential.user;
+            } catch (error) {
+                console.error("Error signing in:", error);
+                throw error;
+            }
+        }
+
+        async function getUserData(uid) {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                if (userDoc.exists) {
+                    return { id: uid, ...userDoc.data() };
+                } else {
+                    throw new Error("User not found");
+                }
+            } catch (error) {
+                console.error("Error getting user data:", error);
+                throw error;
+            }
+        }
+
+        async function getTimetableData(className, section) {
+            try {
+                const timetableDoc = await db.collection('timetable').doc('data').get();
+                if (timetableDoc.exists) {
+                    const data = timetableDoc.data();
+                    return data[className]?.[section] || null;
+                }
+                return null;
+            } catch (error) {
+                console.error("Error getting timetable:", error);
+                return null;
+            }
+        }
+
+        async function getTodayClasses(className, section) {
+            try {
+                const timetableData = await getTimetableData(className, section);
+                if (!timetableData) return [];
+
+                const today = new Date();
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const todayName = days[today.getDay()];
+                
+                const todayClasses = timetableData.schedule[todayName] || [];
+                
+                return todayClasses.map((classItem, index) => ({
+                    id: `${todayName}_${index}`,
+                    ...classItem
+                }));
+            } catch (error) {
+                console.error("Error getting today's classes:", error);
+                return [];
+            }
+        }
+
+        async function saveAttendanceToFirebase(userId, classData, action) {
+            try {
+                await db.collection('attendance').add({
+                    userId: userId,
+                    subject: classData.subject,
+                    action: action,
+                    classTime: classData.time,
+                    room: classData.room,
+                    date: new Date().toISOString().split('T')[0],
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log("Attendance saved successfully");
+            } catch (error) {
+                console.error("Error saving attendance:", error);
+                throw error;
+            }
+        }
+
+        async function getAttendanceStats(userId) {
+            try {
+                const attendanceQuery = await db.collection('attendance')
+                    .where('userId', '==', userId)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                const attendanceRecords = [];
+                attendanceQuery.forEach((doc) => {
+                    attendanceRecords.push(doc.data());
+                });
+
+                return calculateAttendanceStats(attendanceRecords);
+            } catch (error) {
+                console.error("Error getting attendance stats:", error);
+                return {
+                    overall: 0,
+                    subjects: []
+                };
+            }
+        }
+
+        function calculateAttendanceStats(records) {
+            const subjectStats = {};
+            
+            records.forEach(record => {
+                if (!subjectStats[record.subject]) {
+                    subjectStats[record.subject] = {
+                        name: record.subject,
+                        attended: 0,
+                        total: 0
+                    };
+                }
+
+                if (record.action === 'initial_setup') {
+                    subjectStats[record.subject].total += record.totalClasses || 0;
+                    subjectStats[record.subject].attended += record.attendedClasses || 0;
+                } else if (record.action === 'attended') {
+                    subjectStats[record.subject].attended += 1;
+                    subjectStats[record.subject].total += 1;
+                } else if (record.action === 'skipped') {
+                    subjectStats[record.subject].total += 1;
+                }
+            });
+
+            const subjects = Object.values(subjectStats).map(subject => ({
+                ...subject,
+                percentage: subject.total > 0 ? Math.round((subject.attended / subject.total) * 100 * 10) / 10 : 0
+            }));
+
+            const totalAttended = subjects.reduce((sum, subject) => sum + subject.attended, 0);
+            const totalClasses = subjects.reduce((sum, subject) => sum + subject.total, 0);
+            const overall = totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0;
+
+            return {
+                overall,
+                subjects
+            };
+        }
+
+        async function searchUserByName(searchName) {
+            try {
+                const usersQuery = await db.collection('users').get();
+                
+                let foundUser = null;
+                usersQuery.forEach((doc) => {
+                    const userData = doc.data();
+                    if (userData.name.toLowerCase().includes(searchName.toLowerCase())) {
+                        foundUser = { id: doc.id, ...userData };
+                    }
+                });
+
+                if (foundUser) {
+                    const stats = await getAttendanceStats(foundUser.id);
+                    return {
+                        name: foundUser.name,
+                        overall: stats.overall
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error("Error searching user:", error);
+                return null;
+            }
+        }
+
+        // Event Handlers
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+
+            try {
+                const user = await signInUserWithFirebase(email, password);
+                const userData = await getUserData(user.uid);
+                
+                currentUser = userData;
+                await loadDashboardData();
+                showScreen('dashboard');
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
+        }
+
+        async function handleSignup() {
+            const name = document.getElementById('signupName').value;
+            const className = document.getElementById('signupClass').value;
+            const section = document.getElementById('signupSection').value;
+            const rollNo = document.getElementById('signupRoll').value;
+            const dob = document.getElementById('signupDob').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!name || !className || !section || !rollNo || !dob || !email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const signupBtn = document.getElementById('signupBtn');
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Loading...';
+
+            try {
+                const timetableData = await getTimetableData(className, section);
+                if (!timetableData) {
+                    alert('Timetable not found for selected class and section');
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Next: Setup Subjects';
+                    return;
+                }
+
+                window.signupData = { 
+                    name, 
+                    class: className, 
+                    section, 
+                    rollNo, 
+                    dob, 
+                    email, 
+                    password,
+                    subjects: timetableData.subjects
+                };
+                
+                showSetupScreen(timetableData.subjects);
+                showScreen('setup');
+            } catch (error) {
+                alert('Signup failed: ' + error.message);
+            }
+
+            signupBtn.disabled = false;
+            signupBtn.textContent = 'Next: Setup Subjects';
+        }
+
+        function showSetupScreen(subjects) {
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = '';
+
+            subjects.forEach((subject, index) => {
+                const subjectDiv = document.createElement('div');
+                subjectDiv.style.cssText = 'background: var(--gradient-surface); border: 2px solid var(--gray-200); border-radius: 16px; padding: 24px; margin-bottom: 20px; transition: all 0.3s ease;';
+                
+                subjectDiv.innerHTML = `
+                    <h3 style="font-weight: 700; color: var(--secondary); margin-bottom: 20px; font-size: 18px; letter-spacing: -0.01em;">${subject.name} (${subject.code})</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px;">Total Classes</label>
+                            <input type="number" id="total_${subject.id}" min="0" value="0" class="form-input">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px;">Attended Classes</label>
+                            <input type="number" id="attended_${subject.id}" min="0" value="0" class="form-input">
+                        </div>
+                    </div>
+                `;
+                
+                // Add hover effect
+                subjectDiv.addEventListener('mouseenter', () => {
+                    subjectDiv.style.borderColor = 'var(--primary)';
+                    subjectDiv.style.transform = 'translateY(-2px)';
+                    subjectDiv.style.boxShadow = 'var(--shadow-lg)';
+                });
+                
+                subjectDiv.addEventListener('mouseleave', () => {
+                    subjectDiv.style.borderColor = 'var(--gray-200)';
+                    subjectDiv.style.transform = 'translateY(0)';
+                    subjectDiv.style.boxShadow = 'none';
+                });
+                
+                container.appendChild(subjectDiv);
+            });
+        }
+
+        async function handleSetupComplete() {
+            const setupData = [];
+            
+            window.signupData.subjects.forEach(subject => {
+                const total = parseInt(document.getElementById(`total_${subject.id}`).value) || 0;
+                const attended = parseInt(document.getElementById(`attended_${subject.id}`).value) || 0;
+                
+                setupData.push({
+                    ...subject,
+                    total,
+                    attended
+                });
+            });
+
+            const completeBtn = document.getElementById('completeSetup');
+            completeBtn.disabled = true;
+            completeBtn.textContent = 'Setting up...';
+
+            try {
+                const user = await createUserInFirebase({
+                    ...window.signupData,
+                    subjects: setupData
+                });
+
+                const userData = await getUserData(user.uid);
+                currentUser = userData;
+
+                await loadDashboardData();
+                showScreen('dashboard');
+            } catch (error) {
+                alert('Setup failed: ' + error.message);
+            }
+
+            completeBtn.disabled = false;
+            completeBtn.textContent = 'Complete Setup';
+        }
+
+        async function loadDashboardData() {
+            try {
+                todayClasses = await getTodayClasses(currentUser.class, currentUser.section);
+                attendanceStats = await getAttendanceStats(currentUser.id);
+                updateDashboardUI();
+            } catch (error) {
+                console.error("Error loading dashboard data:", error);
+            }
+        }
+
+        function updateDashboardUI() {
+            // Update greeting
+            document.getElementById('greetingTitle').textContent = `HELLO, DEAR ${currentUser.name.toUpperCase()}`;
+            document.getElementById('tipsText').textContent = getTipsMessage(attendanceStats.overall);
+            
+            // Update today's date
+            document.getElementById('todayDate').textContent = formatDate();
+            
+            // Render components
+            renderTodayClasses();
+            renderAttendanceStats();
+            
+            // Update date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateTo').value = today;
+        }
+
+        function renderTodayClasses() {
+            const container = document.getElementById('todayClasses');
+            container.innerHTML = '';
+
+            if (todayClasses.length === 0) {
+                container.innerHTML = `
+                    <div class="no-classes">
+                        <div class="no-classes-icon">📚</div>
+                        <p>No classes scheduled for today!</p>
+                        <small>Enjoy your free time</small>
+                    </div>
+                `;
+                return;
+            }
+
+            todayClasses.forEach(classItem => {
+                const classDiv = document.createElement('div');
+                classDiv.className = 'class-card';
+                
+                classDiv.innerHTML = `
+                    <h4>${classItem.subject}</h4>
+                    <div class="class-info">
+                        <div class="class-info-item">
+                            Time: ${classItem.time}
+                        </div>
+                        <div class="class-info-item">
+                            Room: ${classItem.room}
+                        </div>
+                    </div>
+                    <div class="class-actions">
+                        <button class="btn-action btn-attended" onclick="handleAttendanceAction('${classItem.id}', 'attended')">Attended</button>
+                        <button class="btn-action btn-not-held" onclick="handleAttendanceAction('${classItem.id}', 'not_held')">Not held</button>
+                        <button class="btn-action btn-skipped" onclick="handleAttendanceAction('${classItem.id}', 'skipped')">Skipped</button>
+                    </div>
+                `;
+                
+                container.appendChild(classDiv);
+            });
+        }
+
+        function renderAttendanceStats() {
+            document.getElementById('overallPercentage').textContent = `${attendanceStats.overall}%`;
+
+            const container = document.getElementById('subjectStats');
+            container.innerHTML = '';
+
+            attendanceStats.subjects.forEach(subject => {
+                const subjectDiv = document.createElement('div');
+                subjectDiv.className = 'subject-card';
+                
+                const isGood = subject.percentage >= 75;
+                
+                subjectDiv.innerHTML = `
+                    <div class="subject-header">
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-percentage ${isGood ? 'good' : 'poor'}">${subject.percentage}%</div>
+                    </div>
+                    <div class="subject-details">
+                        <span>Attended: ${subject.attended}</span>
+                        <span>Total: ${subject.total}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${isGood ? 'good' : 'poor'}" style="width: ${subject.percentage}%"></div>
+                    </div>
+                `;
+                
+                container.appendChild(subjectDiv);
+            });
+        }
+
+        async function handleAttendanceAction(classId, action) {
+            try {
+                const classItem = todayClasses.find(c => c.id === classId);
+                if (!classItem) return;
+
+                await saveAttendanceToFirebase(currentUser.id, classItem, action);
+                
+                const actionText = action === 'attended' ? 'Attended' : 
+                                 action === 'skipped' ? 'Skipped' : 'Not Held';
+                
+                // Show enhanced success message
+                const message = document.createElement('div');
+                message.className = 'success-message';
+                message.textContent = `✓ Marked "${classItem.subject}" as ${actionText}`;
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    message.remove();
+                }, 3000);
+                
+                await loadDashboardData();
+            } catch (error) {
+                console.error('Error saving attendance:', error);
+                alert('Failed to save attendance. Please try again.');
+            }
+        }
+
+        async function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const resultDiv = document.getElementById('searchResult');
+            
+            if (!query) {
+                resultDiv.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const result = await searchUserByName(query);
+                
+                if (result) {
+                    resultDiv.innerHTML = `
+                        <p style="font-weight: 700; color: var(--secondary); margin-bottom: 8px; font-size: 16px;">${result.name}</p>
+                        <p style="font-size: 14px; color: var(--gray-600); font-weight: 500;">Overall Attendance: <span style="font-weight: 700; color: var(--primary); font-size: 15px;">${result.overall}%</span></p>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    resultDiv.innerHTML = `<p style="color: var(--gray-600); text-align: center; font-size: 14px; font-weight: 500;">No user found with that name</p>`;
+                    resultDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error searching user:', error);
+                resultDiv.innerHTML = `<p style="color: var(--primary); text-align: center; font-size: 14px; font-weight: 500;">Search failed. Please try again.</p>`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        function showProfile() {
+            const modal = document.getElementById('profileModal');
+            const profileInfo = document.getElementById('profileInfo');
+            
+            profileInfo.innerHTML = `
+                <p><strong>Name:</strong> ${currentUser.name}</p>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <p><strong>Class:</strong> ${currentUser.class}</p>
+                <p><strong>Section:</strong> ${currentUser.section}</p>
+                <p><strong>Roll No:</strong> ${currentUser.rollNo}</p>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function hideProfile() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        async function handleLogout() {
+            try {
+                await auth.signOut();
+                currentUser = null;
+                attendanceStats = null;
+                todayClasses = [];
+                
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('searchInput').value = '';
+                document.getElementById('searchResult').classList.add('hidden');
+                document.getElementById('searchSection').classList.add('hidden');
+                
+                showScreen('login');
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login/Signup navigation
+            document.getElementById('showSignup').addEventListener('click', () => showScreen('signup'));
+            document.getElementById('showLogin').addEventListener('click', () => showScreen('login'));
+
+            // Form submissions
+            document.getElementById('loginBtn').addEventListener('click', handleLogin);
+            document.getElementById('signupBtn').addEventListener('click', handleSignup);
+            document.getElementById('completeSetup').addEventListener('click', handleSetupComplete);
+
+            // Dashboard actions
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('profileBtn').addEventListener('click', showProfile);
+            document.getElementById('closeProfile').addEventListener('click', hideProfile);
+
+            // Search on Enter key
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+
+            // Login on Enter key
+            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            // Close modal on click outside
+            document.getElementById('profileModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideProfile();
+                }
+            });
+
+            // Responsive design handler
+            window.addEventListener('resize', handleResponsiveDesign);
+            handleResponsiveDesign();
+
+            // Initialize test data
+            initializeTestData().catch(console.error);
+        });
+
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            if (user && !currentUser) {
+                try {
+                    const userData = await getUserData(user.uid);
+                    currentUser = userData;
+                    await loadDashboardData();
+                    showScreen('dashboard');
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    showScreen('login');
+                }
+            } else if (!user) {
+                currentUser = null;
+                showScreen('login');
+            }
+        });
+
+        // Add logout button to profile modal when it's shown
+        document.getElementById('profileBtn').addEventListener('click', function() {
+            setTimeout(() => {
+                const profileInfo = document.getElementById('profileInfo');
+                if (!profileInfo.querySelector('.logout-btn')) {
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.textContent = 'Logout';
+                    logoutBtn.className = 'logout-btn';
+                    logoutBtn.style.cssText = `
+                        width: 100%; 
+                        margin-top: 20px; 
+                        padding: 16px; 
+                        background: var(--gray-50); 
+                        border: 2px solid var(--primary); 
+                        border-radius: 12px; 
+                        color: var(--primary); 
+                        font-weight: 600; 
+                        cursor: pointer; 
+                        transition: all 0.3s ease; 
+                        font-size: 15px;
+                        position: relative;
+                        overflow: hidden;
+                    `;
+                    
+                    // Add hover effects
+                    logoutBtn.addEventListener('click', async () => {
+                        hideProfile();
+                        await handleLogout();
+                    });
+                    
+                    logoutBtn.addEventListener('mouseover', () => {
+                        logoutBtn.style.background = 'var(--primary)';
+                        logoutBtn.style.color = 'var(--white)';
+                        logoutBtn.style.transform = 'translateY(-2px)';
+                        logoutBtn.style.boxShadow = 'var(--shadow-md)';
+                    });
+                    
+                    logoutBtn.addEventListener('mouseout', () => {
+                        logoutBtn.style.background = 'var(--gray-50)';
+                        logoutBtn.style.color = 'var(--primary)';
+                        logoutBtn.style.transform = 'translateY(0)';
+                        logoutBtn.style.boxShadow = 'none';
+                    });
+                    
+                    profileInfo.appendChild(logoutBtn);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
