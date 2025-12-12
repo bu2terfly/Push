@@ -2,117 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Attenza — Firebase Demo (Hybrid)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Attenza — Mobile Demo (Firebase Hybrid)</title>
+
+  <!-- Mobile-first styles -->
   <style>
     :root{
-      --bg:#f6f8fb; --card:#fff; --accent:#0b75ff; --muted:#6b7280; --radius:12px;
+      --bg:#f5f7fb; --card:#ffffff; --accent:#0b75ff; --muted:#64748b; --ok:#10b981; --err:#ef4444;
+      --radius:14px; --gap:12px; --shadow:0 6px 20px rgba(12,20,40,0.06);
+      --maxWidth:760px;
     }
-    body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);margin:0;padding:28px;color:#0f172a;}
-    .wrap{max-width:980px;margin:0 auto;}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-    h1{font-size:20px;margin:0}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 18px rgba(10,20,40,0.06);padding:18px}
-    form .row{display:flex;gap:10px;margin-bottom:10px}
-    label{font-size:13px;color:var(--muted)}
-    input,select,textarea{padding:10px;border-radius:8px;border:1px solid rgba(10,20,30,0.06);width:100%}
-    button{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#0f172a;background:linear-gradient(180deg,#f7fafc,#f5f7fb);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;display:flex;align-items:flex-start;justify-content:center;padding:18px;}
+    .app{width:100%;max-width:var(--maxWidth)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    h1{font-size:18px;margin:0}
     .small{font-size:13px;color:var(--muted)}
-    .schedule-day{margin-top:14px}
-    .slot{display:grid;grid-template-columns:100px 1fr 170px 160px;gap:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfdff);margin-bottom:10px;align-items:center}
-    .slot-time{font-weight:700;color:var(--accent)}
-    .slot-subject{font-weight:700}
-    .slot-meta{color:var(--muted);font-size:13px}
-    .actions{display:flex;gap:8px;justify-self:end}
-    .btn-lite{border-radius:8px;padding:8px 10px;border:1px solid rgba(10,20,30,0.06);background:transparent;cursor:pointer}
-    .present{background:#10b981;color:white;border:none}
-    .absent{background:#ef4444;color:white;border:none}
-    .notheld{background:transparent;border:1px dashed rgba(10,20,30,0.06);color:var(--muted)}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;margin-bottom:12px}
+    .auth-row{display:flex;gap:10px;flex-wrap:wrap}
+    input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(12,20,40,0.06);font-size:15px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    button{background:var(--accent);color:white;border:none;padding:12px;border-radius:10px;font-weight:700;font-size:15px}
+    .btn-ghost{background:transparent;border:1px solid rgba(12,20,40,0.06);color:var(--muted)}
+    .flex{display:flex;gap:10px;align-items:center}
+    .pill{background:rgba(12,20,40,0.05);padding:8px 10px;border-radius:999px;font-weight:700}
+    .muted{color:var(--muted)}
+    /* Schedule list */
+    .controls{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .search{flex:1}
+    .slot{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid rgba(10,20,30,0.03);margin-bottom:10px}
+    .slot-time{font-weight:800;color:var(--accent);font-size:14px;display:flex;align-items:center;justify-content:center}
+    .slot-main{display:flex;flex-direction:column;gap:6px}
+    .slot-title{font-weight:700;font-size:15px}
+    .slot-meta{font-size:13px;color:var(--muted)}
+    .slot-actions{display:flex;gap:8px;align-items:center;justify-self:end}
+    .btn-small{padding:8px 10px;border-radius:10px;border:none;font-weight:700}
+    .present{background:var(--ok);color:white}
+    .absent{background:var(--err);color:white}
+    .notheld{background:transparent;border:1px dashed rgba(10,20,30,0.07);color:var(--muted)}
+    .center{display:flex;justify-content:center;align-items:center}
     .hidden{display:none}
-    .topline{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .profile{display:flex;gap:12px;align-items:center}
-    .pill{background:rgba(10,20,30,0.04);padding:8px 10px;border-radius:999px;font-weight:700}
-    footer{margin-top:20px;color:var(--muted);font-size:13px}
-    @media(max-width:780px){ .slot{grid-template-columns:1fr;grid-template-rows:auto auto auto auto} .actions{justify-self:start} .slot-time{text-align:left} }
+    /* collapsible details */
+    .details{margin-top:8px;padding:10px;border-radius:10px;background:rgba(11,119,255,0.03);font-size:13px;color:var(--muted)}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(6,10,20,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
+    .modal{width:92%;max-width:560px;border-radius:12px;padding:12px;background:var(--card)}
+    .row{display:flex;gap:10px}
+    .row > *{flex:1}
+    /* responsive */
+    @media(min-width:720px){
+      .slot{grid-template-columns:90px 1fr 180px;align-items:center}
+      .slot-meta{font-size:14px}
+    }
+    footer{font-size:13px;color:var(--muted);margin-top:6px;text-align:center}
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="app">
     <header>
-      <h1>Attenza — Firebase Demo (Hybrid)</h1>
-      <div class="small">Firebase Auth + Firestore + Google Sheet import</div>
+      <div>
+        <h1>Attenza — Mobile Demo</h1>
+        <div class="small">Firebase + Google Sheet import — hybrid caching</div>
+      </div>
+      <div class="center">
+        <div id="syncIndicator" class="pill small">Offline</div>
+      </div>
     </header>
 
+    <!-- AUTH CARD -->
     <div id="authCard" class="card">
-      <div class="topline">
-        <div>
-          <div style="font-weight:700;">Sign up / Sign in</div>
-          <div class="small">On signup the schedule is imported once from your Google Sheet and stored in Firestore.</div>
-        </div>
-        <div class="profile">
-          <div id="userEmail" class="small"></div>
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><strong>Sign up / Sign in</strong><div class="small muted">Import schedule once at signup</div></div>
+        <div id="userEmailSmall" class="small muted"></div>
       </div>
 
-      <div id="authForms">
-        <form id="signupForm">
-          <div class="row">
-            <div style="flex:1">
-              <label>Email</label>
-              <input id="email" type="email" required placeholder="you@example.com" />
-            </div>
-            <div style="width:200px">
-              <label>Password</label>
-              <input id="password" type="password" required placeholder="min 6 chars"/>
-            </div>
+      <form id="signupForm">
+        <div class="row" style="margin-bottom:10px">
+          <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@example.com" required />
           </div>
+          <div style="width:120px">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="min 6 chars" required />
+          </div>
+        </div>
 
-          <div class="row">
-            <div style="flex:1">
-              <label>Class</label>
-              <select id="classSelect">
-                <option value="HS1">HS1</option>
-                <option value="HS2">HS2</option>
-                <option value="BCom1st">BCom1st</option>
-                <option value="BCom3rd">BCom3rd</option>
-                <option value="BCom5th">BCom5th</option>
-              </select>
-            </div>
-            <div style="width:160px">
-              <label>Section</label>
-              <select id="sectionSelect">
-                <option value="">—</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-              </select>
-            </div>
+        <div class="row" style="margin-bottom:10px">
+          <div>
+            <label for="classSelect">Class</label>
+            <select id="classSelect">
+              <option value="HS1">HS1</option>
+              <option value="HS2">HS2</option>
+              <option value="BCom1st">BCom1st</option>
+            </select>
           </div>
+          <div style="width:120px">
+            <label for="sectionSelect">Section</label>
+            <select id="sectionSelect">
+              <option value="">—</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+        </div>
 
-          <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
-            <button id="signupBtn" type="submit">Create account & import schedule</button>
-            <button id="signinBtn" type="button" class="btn-lite">Sign in</button>
-          </div>
-          <div id="authMsg" class="small" style="margin-top:8px;color:#b91c1c"></div>
-        </form>
-      </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button id="signupBtn" type="submit">Create account & import</button>
+          <button id="signinBtn" type="button" class="btn-ghost">Sign in</button>
+        </div>
+        <div id="authMsg" class="small" style="color:var(--err)"></div>
+      </form>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="dashboard" class="card hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div>
-          <div style="font-weight:700" id="dashTitle">Today’s classes</div>
-          <div class="small" id="dashSubtitle"></div>
+          <div style="font-weight:800" id="dashTitle">Today's classes</div>
+          <div id="dashSubtitle" class="small muted"></div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="pill" id="userInfoPill"></div>
-          <button id="signoutBtn" class="btn-lite">Sign out</button>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div id="userInfoPill" class="pill small">—</div>
+          <div style="display:flex;gap:6px">
+            <button id="refreshBtn" class="btn-ghost">Refresh</button>
+            <button id="signoutBtn" class="btn-ghost">Sign out</button>
+          </div>
         </div>
       </div>
 
-      <div style="margin-top:12px">
-        <label class="small">Show day</label>
-        <select id="dayPicker" style="margin-top:6px;padding:8px;border-radius:8px;border:1px solid rgba(10,20,30,0.06)">
-          <option value="today">Show Today</option>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <select id="dayPicker" style="padding:10px;border-radius:10px;border:1px solid rgba(10,20,30,0.06)">
+          <option value="today">Today</option>
           <option value="monday">Monday</option>
           <option value="tuesday">Tuesday</option>
           <option value="wednesday">Wednesday</option>
@@ -120,23 +142,64 @@
           <option value="friday">Friday</option>
           <option value="saturday">Saturday</option>
         </select>
+        <input id="searchInput" placeholder="Search subject / room / faculty" style="padding:10px;border-radius:10px;border:1px solid rgba(10,20,30,0.06);flex:1" />
       </div>
 
-      <div id="scheduleContainer" class="schedule-day" style="margin-top:14px"></div>
+      <div id="scheduleList"></div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="historyBtn" class="btn-ghost" style="flex:1">Attendance history</button>
+        <button id="editProfileBtn" class="btn-ghost" style="flex:1">Edit profile</button>
+      </div>
       <footer>
-        This demo stores schedule in Firestore and caches a copy in localStorage for speed/offline.
+        Demo stores schedule in Firestore and caches a copy locally. Network-dependent features show offline fallback.
       </footer>
     </div>
+
+    <!-- Attendance history modal -->
+    <div id="historyModal" class="modal-backdrop hidden">
+      <div class="modal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>Attendance history</strong>
+          <button id="closeHistory" class="btn-ghost">Close</button>
+        </div>
+        <div style="margin-bottom:8px">
+          <label class="small">Date</label>
+          <input id="historyDate" type="date" />
+        </div>
+        <div id="historyList" style="max-height:320px;overflow:auto"></div>
+      </div>
+    </div>
+
+    <!-- Remarks modal -->
+    <div id="remarksModal" class="modal-backdrop hidden">
+      <div class="modal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong id="remarksTitle">Add remark</strong>
+          <button id="closeRemarks" class="btn-ghost">Close</button>
+        </div>
+        <div style="margin-bottom:8px">
+          <label class="small">Remark (short)</label>
+          <textarea id="remarkInput" rows="3" placeholder="Optional: topic, page, note"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="saveRemarkBtn">Save & mark</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
+  <!-- Firebase + app logic -->
   <script type="module">
-    // ---------- Firebase config (you provided) ----------
+    // ---------- Firebase & Firestore imports ----------
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
     import {
       getFirestore, collection, doc, setDoc, writeBatch, getDocs, query, where, getDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+    // ---------- Firebase config ----------
     const firebaseConfig = {
       apiKey: "AIzaSyDKhSmOS8RWfzlopEzNgePkXz4YRfN3RCU",
       authDomain: "fir-7692e.firebaseapp.com",
@@ -150,19 +213,54 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ---------- IMPORTANT: replace with your published CSV URL ----------
-    // Publish your Google Sheet (File -> Publish to web -> CSV) and paste the CSV URL here.
-    let SCHEDULE_CSV_URL = "REPLACE_WITH_YOUR_PUBLISHED_CSV_URL";
+    // ---------- IMPORTANT: CSV URL (your published sheet) ----------
+    const SCHEDULE_CSV_URL = "https://docs.google.com/spreadsheets/d/1hJCm4esdEHLRv8UgWkRZIxpwd3OGgI3BbEv11HMq2RA/export?format=csv&gid=0";
 
-    // ---------- Helpers ----------
+    // ---------- Helpers & DOM ----------
     const $ = id => document.getElementById(id);
+    const fmtDay = d => d.charAt(0).toLowerCase() + d.slice(1);
     const todayName = ()=> ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+    const uidLocalKey = email => `attenza_profile:${email}`;
+    const schedLocalKey = email => `attenza_schedule:${email}`;
 
-    // Simple CSV parser suitable for our published CSV (no embedded commas)
+    // DOM refs
+    const signupForm = $('signupForm');
+    const signupBtn = $('signupBtn');
+    const signinBtn = $('signinBtn');
+    const authMsg = $('authMsg');
+    const authCard = $('authCard');
+    const dashboard = $('dashboard');
+    const scheduleList = $('scheduleList');
+    const userInfoPill = $('userInfoPill');
+    const userEmailSmall = $('userEmailSmall');
+    const dayPicker = $('dayPicker');
+    const searchInput = $('searchInput');
+    const signoutBtn = $('signoutBtn');
+    const refreshBtn = $('refreshBtn');
+    const syncIndicator = $('syncIndicator');
+    const historyBtn = $('historyBtn');
+    const historyModal = $('historyModal');
+    const closeHistory = $('closeHistory');
+    const historyDate = $('historyDate');
+    const historyList = $('historyList');
+    const remarksModal = $('remarksModal');
+    const remarkInput = $('remarkInput');
+    const remarksTitle = $('remarksTitle');
+    const closeRemarks = $('closeRemarks');
+    const saveRemarkBtn = $('saveRemarkBtn');
+    const editProfileBtn = $('editProfileBtn');
+
+    // State
+    let CURRENT_USER = null; // { uid, email, class, section }
+    let MASTER_SCHEDULE = []; // full CSV (for debug)
+    let CURRENT_DAY_ROWS = []; // filtered rows for current day
+    let pendingMark = null; // {row, status} used by remarks modal
+
+    // ---------- Utility functions ----------
     function parseCSV(text){
       const lines = text.trim().split(/\r?\n/).filter(Boolean);
       const header = lines.shift().split(',').map(h=>h.trim());
-      return lines.map(line=>{
+      return lines.map(line => {
         const cols = line.split(',').map(c=>c.trim());
         const obj = {};
         header.forEach((h,i)=> obj[h]=cols[i] ?? '');
@@ -170,7 +268,6 @@
       });
     }
 
-    // Fetch CSV
     async function fetchMasterCsv(url){
       const res = await fetch(url);
       if(!res.ok) throw new Error('Failed to load CSV: '+res.status);
@@ -178,146 +275,162 @@
       return parseCSV(txt);
     }
 
-    // Firestore helpers: write user profile and schedule snapshot (batch)
+    function setSyncState(isOnline){
+      syncIndicator.textContent = isOnline ? 'Online' : 'Offline';
+      syncIndicator.style.background = isOnline ? 'rgba(16,185,129,0.12)' : 'rgba(10,20,30,0.05)';
+    }
+
+    // derive slotId
+    function makeSlotId(r){
+      const safe = (r.subject || r.subject_label || '').replace(/\s+/g,'_').replace(/[^\w\-]/g,'');
+      return `${r.day}_${r.start_time}_${safe}`.toLowerCase();
+    }
+
+    // ---------- Firestore operations ----------
     async function saveUserProfile(uid, profile){
       const ref = doc(db, 'users', uid);
       await setDoc(ref, {...profile, createdAt: serverTimestamp()});
     }
 
     async function writeUserSchedule(uid, rows){
-      // rows: array objects with fields day,class,section,start_time,subject,room,faculty
+      if(!rows.length) return;
       const batch = writeBatch(db);
       rows.forEach(r=>{
-        const safeSubject = (r.subject||'').replace(/\s+/g,'_').replace(/[^\w\-]/g,'');
-        const slotId = `${r.day}_${r.start_time}_${safeSubject}`.toLowerCase();
+        const slotId = makeSlotId(r);
         const ref = doc(db, 'users', uid, 'schedule', slotId);
         batch.set(ref, {
-          day: r.day,
-          start_time: r.start_time,
-          subject_label: r.subject,
-          room: r.room,
-          faculty: r.faculty,
-          createdAt: serverTimestamp()
+          day: r.day, start_time: r.start_time, subject_label: r.subject, room: r.room, faculty: r.faculty, createdAt: serverTimestamp()
         });
       });
       await batch.commit();
     }
 
-    // Read schedule for a user for a given day (query)
     async function getScheduleForDay(uid, day){
+      // returns array of docs
       const colRef = collection(db, 'users', uid, 'schedule');
       const q = query(colRef, where('day','==',day));
       const snap = await getDocs(q);
-      return snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b)=> (a.start_time||'').localeCompare(b.start_time||''));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b)=> (a.start_time||'').localeCompare(b.start_time||''));
     }
 
-    // Save attendance doc (one small doc)
     async function saveAttendance(uid, dateISO, slotId, status, remark=''){
       const attDocId = `${dateISO}_${slotId}`;
       const ref = doc(db, 'users', uid, 'attendance', attDocId);
-      await setDoc(ref, {
-        slotId, date: dateISO, status, remark, updatedAt: serverTimestamp()
-      });
-      // Save local cache too
-      try {
-        const key = `att_cache:${uid}:${dateISO}:${slotId}`;
-        localStorage.setItem(key, status);
-      } catch(e){}
+      await setDoc(ref, { slotId, date: dateISO, status, remark, updatedAt: serverTimestamp() });
+      // local cache
+      try{ localStorage.setItem(`att_cache:${uid}:${dateISO}:${slotId}`, JSON.stringify({status,remark})); }catch(e){}
     }
 
-    // Load attendance from local cache (fast)
-    function loadAttendanceLocal(uid, dateISO, slotId){
-      try{
-        const key = `att_cache:${uid}:${dateISO}:${slotId}`;
-        return localStorage.getItem(key) || '';
-      }catch(e){ return ''; }
+    async function getAttendanceForDate(uid, dateISO){
+      const colRef = collection(db, 'users', uid, 'attendance');
+      const q = query(colRef, where('date','==',dateISO));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
-    // ---------- UI wiring ----------
-    const signupForm = $('signupForm');
-    const signinBtn = $('signinBtn');
-    const authMsg = $('authMsg');
-    const authCard = $('authCard');
-    const dashboard = $('dashboard');
-    const scheduleContainer = $('scheduleContainer');
-    const userInfoPill = $('userInfoPill');
-    const userEmailEl = $('userEmail');
-    const dayPicker = $('dayPicker');
-    const signoutBtn = $('signoutBtn');
-
-    let CURRENT_USER = null;
-    let MASTER_SCHEDULE = []; // not used as canonical after import, but kept for convenience
-
-    // Build schedule rows to render
-    function renderScheduleRows(rows, uid){
-      scheduleContainer.innerHTML = '';
+    // ---------- UI rendering ----------
+    function renderSlotList(rows){
+      scheduleList.innerHTML = '';
       if(!rows.length){
-        scheduleContainer.innerHTML = '<div class="small">No classes for this day.</div>';
+        scheduleList.innerHTML = '<div class="small muted center">No classes for this day.</div>';
         return;
       }
-      rows.forEach(row=>{
+      rows.forEach(r=>{
         const div = document.createElement('div'); div.className='slot';
-        const time = document.createElement('div'); time.className='slot-time'; time.textContent = row.start_time || '—';
-        const subj = document.createElement('div'); subj.className='slot-subject';
-        subj.innerHTML = `<div>${row.subject_label || row.subject || '—'}</div><div class="small">${row.class?row.class:''} ${row.section?(' • '+row.section):''}</div>`;
-        const meta = document.createElement('div'); meta.className='slot-meta';
-        meta.innerHTML = `<div>Room: ${row.room || '—'}</div><div>Faculty: ${row.faculty || '—'}</div>`;
-        const actions = document.createElement('div'); actions.className='actions';
+        const time = document.createElement('div'); time.className='slot-time'; time.textContent = r.start_time || '—';
+        const main = document.createElement('div'); main.className='slot-main';
+        const title = document.createElement('div'); title.className='slot-title'; title.textContent = r.subject || r.subject_label || '—';
+        const meta = document.createElement('div'); meta.className='slot-meta'; meta.textContent = `${r.room || '—'} • ${r.faculty || '—'}`;
+        main.appendChild(title); main.appendChild(meta);
 
-        const pBtn = document.createElement('button'); pBtn.className='present'; pBtn.textContent='Present';
-        const aBtn = document.createElement('button'); aBtn.className='absent'; aBtn.textContent='Absent';
-        const nBtn = document.createElement('button'); nBtn.className='notheld'; nBtn.textContent='Not Held';
-        const statusSpan = document.createElement('div'); statusSpan.className='small';
+        // actions (present / absent / not held)
+        const actions = document.createElement('div'); actions.style.display='flex'; actions.style.flexDirection='column'; actions.style.gap='8px';
+        const pBtn = document.createElement('button'); pBtn.className='btn-small present'; pBtn.textContent='Present';
+        const aBtn = document.createElement('button'); aBtn.className='btn-small absent'; aBtn.textContent='Absent';
+        const nBtn = document.createElement('button'); nBtn.className='btn-small notheld'; nBtn.textContent='Not Held';
 
-        // derive slotId same way as writeUserSchedule
-        const safeSubject = (row.subject_label||row.subject||'').replace(/\s+/g,'_').replace(/[^\w\-]/g,'');
-        const slotId = `${row.day}_${row.start_time}_${safeSubject}`.toLowerCase();
+        // show current saved status badge
+        const badge = document.createElement('div'); badge.className='small muted';
+        // load local attendance snapshot for today
         const dateISO = new Date().toISOString().slice(0,10);
-        // set initial status from local cache
-        const localStatus = loadAttendanceLocal(CURRENT_USER.uid, dateISO, slotId);
-        if(localStatus) statusSpan.textContent = localStatus.toUpperCase();
+        const uid = CURRENT_USER.uid;
+        const slotId = makeSlotId(r);
+        const cached = localStorage.getItem(`att_cache:${uid}:${dateISO}:${slotId}`);
+        if(cached){
+          try{
+            const obj = JSON.parse(cached);
+            badge.textContent = obj.status ? obj.status.toUpperCase() : '';
+          }catch(e){}
+        }
 
-        pBtn.onclick = async ()=>{ statusSpan.textContent='PRESENT'; await saveAttendance(CURRENT_USER.uid, dateISO, slotId, 'present'); };
-        aBtn.onclick = async ()=>{ statusSpan.textContent='ABSENT'; await saveAttendance(CURRENT_USER.uid, dateISO, slotId, 'absent'); };
-        nBtn.onclick = async ()=>{ statusSpan.textContent='NOT HELD'; await saveAttendance(CURRENT_USER.uid, dateISO, slotId, 'not_held'); };
+        // event handlers - open remarks modal before final save
+        pBtn.onclick = ()=>{ pendingMark = { row:r, status:'present', slotId }; remarksTitle.textContent = `Present — ${r.subject}`; remarkInput.value = ''; remarksModal.classList.remove('hidden'); };
+        aBtn.onclick = ()=>{ pendingMark = { row:r, status:'absent', slotId }; remarksTitle.textContent = `Absent — ${r.subject}`; remarkInput.value = ''; remarksModal.classList.remove('hidden'); };
+        nBtn.onclick = async ()=>{ // direct not held without remark
+          try{
+            setSyncState(navigator.onLine);
+            await saveAttendance(CURRENT_USER.uid, dateISO, slotId, 'not_held', '');
+            badge.textContent = 'NOT HELD';
+          }catch(err){
+            console.error(err);
+            alert('Save failed');
+          }
+        };
 
         actions.appendChild(pBtn); actions.appendChild(aBtn); actions.appendChild(nBtn);
-        div.appendChild(time); div.appendChild(subj); div.appendChild(meta); div.appendChild(actions);
-        scheduleContainer.appendChild(div);
+
+        // details toggler
+        const details = document.createElement('div'); details.className='details hidden';
+        details.innerHTML = `<div><strong>Class:</strong> ${r.class || ''} ${r.section?('• '+r.section):''}</div>
+                             <div><strong>Faculty:</strong> ${r.faculty || ''}</div>
+                             <div style="margin-top:6px"><strong>Slot id:</strong> ${slotId}</div>
+                             <div style="margin-top:6px" id="badge-${slotId}">${badge.outerHTML}</div>`;
+
+        // click-to-expand on main area
+        main.onclick = ()=>{ details.classList.toggle('hidden'); };
+
+        div.appendChild(time); div.appendChild(main); div.appendChild(actions);
+        div.appendChild(details);
+        scheduleList.appendChild(div);
       });
     }
 
-    async function updateScheduleView(){
-      const day = (dayPicker.value === 'today') ? todayName() : dayPicker.value;
-      // try read from Firestore
-      try{
-        const rows = await getScheduleForDay(CURRENT_USER.uid, day);
-        // if no rows in firestore, fallback to local snapshot
-        if(rows.length === 0){
-          const snap = localStorage.getItem(`attenza_schedule:${CURRENT_USER.email}`);
-          if(snap){
-            const arr = JSON.parse(snap).filter(r=> r.day === day);
-            renderScheduleRows(arr, CURRENT_USER.uid);
-            $('dashSubtitle').textContent = `${day.charAt(0).toUpperCase()+day.slice(1)} • ${arr.length} slot(s) (cached)`;
-            return;
-          }
-        }
-        renderScheduleRows(rows, CURRENT_USER.uid);
-        $('dashSubtitle').textContent = `${day.charAt(0).toUpperCase()+day.slice(1)} • ${rows.length} slot(s)`;
-      }catch(err){
-        console.warn('Firestore read failed, falling back to local snapshot', err);
-        const snap = localStorage.getItem(`attenza_schedule:${CURRENT_USER.email}`);
-        if(snap){
-          const arr = JSON.parse(snap).filter(r=> r.day === (day === 'today' ? todayName() : day));
-          renderScheduleRows(arr, CURRENT_USER.uid);
-          $('dashSubtitle').textContent = `${day.charAt(0).toUpperCase()+day.slice(1)} • ${arr.length} slot(s) (cached)`;
-        } else {
-          scheduleContainer.innerHTML = '<div class="small">Unable to load schedule (check network or published CSV URL).</div>';
-        }
-      }
+    // filter by search
+    function filterRows(rows, q){
+      if(!q) return rows;
+      q = q.trim().toLowerCase();
+      return rows.filter(r => (r.subject||'').toLowerCase().includes(q) || (r.room||'').toLowerCase().includes(q) || (r.faculty||'').toLowerCase().includes(q));
     }
 
-    // ---------- Signup flow: create auth user, fetch CSV, write profile & schedule ----------
+    // ---------- Event bindings ----------
+    dayPicker.addEventListener('change', ()=> loadDayView());
+    searchInput.addEventListener('input', ()=> renderSlotList(filterRows(CURRENT_DAY_ROWS, searchInput.value)));
+    refreshBtn.addEventListener('click', ()=> loadDayView(true));
+    historyBtn.addEventListener('click', ()=> { historyModal.classList.remove('hidden'); historyDate.value = new Date().toISOString().slice(0,10); loadHistory(); });
+    closeHistory.addEventListener('click', ()=> historyModal.classList.add('hidden'));
+    closeRemarks.addEventListener('click', ()=> remarksModal.classList.add('hidden'));
+    saveRemarkBtn.addEventListener('click', async ()=>{
+      if(!pendingMark) return;
+      const remark = remarkInput.value.trim();
+      const dateISO = new Date().toISOString().slice(0,10);
+      try{
+        await saveAttendance(CURRENT_USER.uid, dateISO, pendingMark.slotId, pendingMark.status, remark);
+        // update local badge display quickly
+        localStorage.setItem(`att_cache:${CURRENT_USER.uid}:${dateISO}:${pendingMark.slotId}`, JSON.stringify({status: pendingMark.status, remark}));
+        remarksModal.classList.add('hidden');
+        loadDayView();
+      }catch(err){
+        console.error(err);
+        alert('Save failed');
+      }
+    });
+
+    editProfileBtn.addEventListener('click', async ()=>{
+      // quick profile edit: sign out and let user create/import again
+      alert('To change class/section, sign out and sign up again with new selection (demo).');
+    });
+
+    // ---------- Signup / Signin flow ----------
     signupForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       authMsg.textContent = '';
@@ -326,77 +439,61 @@
       const classCode = $('classSelect').value;
       const section = $('sectionSelect').value;
       if(!SCHEDULE_CSV_URL || SCHEDULE_CSV_URL.includes('REPLACE_WITH')) {
-        authMsg.textContent = 'Set SCHEDULE_CSV_URL in the code to your published Google Sheet CSV URL.';
+        authMsg.textContent = 'Set the schedule CSV URL in code.';
         return;
       }
       try{
         const cred = await createUserWithEmailAndPassword(auth, email, pwd);
         const uid = cred.user.uid;
-        // Fetch CSV (master)
+        // fetch master CSV
+        setSyncState(navigator.onLine);
         const master = await fetchMasterCsv(SCHEDULE_CSV_URL);
-        MASTER_SCHEDULE = master; // keep copy for debugging
-        // Filter rows for this class + section (match empty section for HS)
+        MASTER_SCHEDULE = master;
+        // filter rows
         const snapshotRows = master.filter(r => (r.class||'') === classCode && ((r.section||'') === section || (section === '' && (r.section||'')==='')));
-        // save profile & schedule to Firestore
+        // write profile & schedule to firestore
         const profile = { email, class: classCode, section };
         await saveUserProfile(uid, profile);
         if(snapshotRows.length) await writeUserSchedule(uid, snapshotRows);
-        // Cache snapshot locally
-        localStorage.setItem(`attenza_profile:${email}`, JSON.stringify({ uid, email, class: classCode, section }));
-        localStorage.setItem(`attenza_schedule:${email}`, JSON.stringify(snapshotRows));
-        // set current user and show dashboard
-        CURRENT_USER = { uid, email };
-        showDashboardFor({ uid, email, class: classCode, section });
+        // cache snapshot locally
+        localStorage.setItem(uidLocalKey(email), JSON.stringify({ uid, email, class: classCode, section }));
+        localStorage.setItem(schedLocalKey(email), JSON.stringify(snapshotRows));
+        // set current and show
+        CURRENT_USER = { uid, email, class: classCode, section };
+        showDashboardFor(CURRENT_USER);
       }catch(err){
         console.error(err);
         authMsg.textContent = err.message || 'Signup failed';
       }
     });
 
-    // Sign in
     signinBtn.addEventListener('click', async ()=>{
       authMsg.textContent = '';
       const email = $('email').value.trim();
       const pwd = $('password').value;
-      if(!email || !pwd){ authMsg.textContent = 'Enter email & password to sign in.'; return; }
+      if(!email || !pwd){ authMsg.textContent = 'Enter email & password'; return; }
       try{
         const cred = await signInWithEmailAndPassword(auth, email, pwd);
         const uid = cred.user.uid;
-        // load profile from local cache if available else from Firestore profile
-        const saved = localStorage.getItem(`attenza_profile:${email}`);
-        let profile = saved ? JSON.parse(saved) : null;
-        if(!profile){
+        // load profile from local cache else from Firestore
+        let profile = null;
+        const saved = localStorage.getItem(uidLocalKey(email));
+        if(saved) profile = JSON.parse(saved);
+        else {
           const docRef = doc(db, 'users', uid);
           const snap = await getDoc(docRef);
-          if(snap.exists()){
-            const data = snap.data();
-            profile = { uid, email, class: data.class || data.classCode || '', section: data.section || '' };
-            localStorage.setItem(`attenza_profile:${email}`, JSON.stringify(profile));
-          } else {
-            profile = { uid, email, class: $('classSelect').value, section: $('sectionSelect').value };
-          }
+          if(snap.exists()) profile = { uid, email, class: snap.data().class || '', section: snap.data().section || '' };
         }
-        CURRENT_USER = profile;
-        // if schedule snapshot cached locally, reuse; otherwise rely on Firestore reads (updateScheduleView handles fallback)
-        const snap = localStorage.getItem(`attenza_schedule:${email}`);
-        if(snap) MASTER_SCHEDULE = JSON.parse(snap);
-        showDashboardFor(profile);
+        CURRENT_USER = profile || { uid, email, class: $('classSelect').value, section: $('sectionSelect').value };
+        // if schedule cached locally, keep it; otherwise we'll read Firestore when loading day
+        const snapSched = localStorage.getItem(schedLocalKey(email));
+        if(snapSched) MASTER_SCHEDULE = JSON.parse(snapSched);
+        showDashboardFor(CURRENT_USER);
       }catch(err){
         console.error(err);
         authMsg.textContent = err.message || 'Sign-in failed';
       }
     });
-
-    // show dashboard
-    function showDashboardFor(profile){
-      CURRENT_USER = profile;
-      $('authCard').classList.add('hidden');
-      $('dashboard').classList.remove('hidden');
-      userInfoPill.textContent = `${profile.email} • ${profile.class}${profile.section?(' • ' + profile.section):''}`;
-      userEmailEl.textContent = profile.email;
-      dayPicker.value = 'today';
-      updateScheduleView();
-    }
 
     signoutBtn.addEventListener('click', async ()=>{
       await signOut(auth);
@@ -405,18 +502,91 @@
       $('dashboard').classList.add('hidden');
     });
 
-    dayPicker.addEventListener('change', updateScheduleView);
+    // ---------- Load day view (tries Firestore then local) ----------
+    async function loadDayView(forceRefresh=false){
+      if(!CURRENT_USER) return;
+      const day = (dayPicker.value === 'today') ? todayName() : dayPicker.value;
+      setSyncState(navigator.onLine);
+      try{
+        // read from Firestore
+        const rows = await getScheduleForDay(CURRENT_USER.uid, day);
+        if(rows.length === 0 && !forceRefresh){
+          // fallback to local snapshot if firestore empty
+          const cached = localStorage.getItem(schedLocalKey(CURRENT_USER.email));
+          if(cached){
+            const arr = JSON.parse(cached).filter(r=> r.day === day);
+            CURRENT_DAY_ROWS = arr;
+            renderSlotList(filterRows(CURRENT_DAY_ROWS, searchInput.value));
+            $('dashSubtitle').textContent = `${day.charAt(0).toUpperCase()+day.slice(1)} • ${arr.length} slot(s) (cached)`;
+            return;
+          }
+        }
+        // convert Firestore docs into display rows (some fields may be labeled differently)
+        const arr = rows.map(r=>({
+          day: r.day || day,
+          start_time: r.start_time || '',
+          subject: r.subject_label || r.subject || '',
+          room: r.room || '',
+          faculty: r.faculty || '',
+          class: r.class || CURRENT_USER.class,
+          section: r.section || CURRENT_USER.section
+        }));
+        CURRENT_DAY_ROWS = arr;
+        renderSlotList(filterRows(CURRENT_DAY_ROWS, searchInput.value));
+        $('dashSubtitle').textContent = `${day.charAt(0).toUpperCase()+day.slice(1)} • ${arr.length} slot(s)`;
+      }catch(err){
+        console.warn('Firestore read failed', err);
+        // fallback to cached
+        const cached = localStorage.getItem(schedLocalKey(CURRENT_USER.email));
+        if(cached){
+          const arr = JSON.parse(cached).filter(r=> r.day === day);
+          CURRENT_DAY_ROWS = arr;
+          renderSlotList(filterRows(CURRENT_DAY_ROWS, searchInput.value));
+          $('dashSubtitle').textContent = `${day.charAt(0).toUpperCase()+day.slice(1)} • ${arr.length} slot(s) (cached)`;
+          setSyncState(false);
+          return;
+        }
+        scheduleList.innerHTML = '<div class="small muted center">Unable to load schedule. Check network and published CSV URL.</div>';
+      }
+    }
 
-    // Auth state listener to keep UI in sync across tabs
+    // ---------- Attendance history ----------
+    async function loadHistory(){
+      if(!CURRENT_USER) return;
+      const dateISO = historyDate.value;
+      try{
+        const rows = await getAttendanceForDate(CURRENT_USER.uid, dateISO);
+        if(!rows.length) historyList.innerHTML = '<div class="small muted center">No attendance logged for this date.</div>';
+        else {
+          historyList.innerHTML = rows.map(r=>`<div class="card" style="margin-bottom:8px;padding:8px"><div style="font-weight:700">${r.slotId.replace(`${dateISO}_`,'')}</div><div class="small muted">Status: ${r.status} ${r.remark?('<br>Remark: '+r.remark):''}</div></div>`).join('');
+        }
+      }catch(err){
+        console.error(err);
+        historyList.innerHTML = '<div class="small muted center">Failed to load history.</div>';
+      }
+    }
+
+    // ---------- UI helpers ----------
+    function showDashboardFor(profile){
+      CURRENT_USER = profile;
+      $('authCard').classList.add('hidden');
+      $('dashboard').classList.remove('hidden');
+      userInfoPill.textContent = `${profile.email} • ${profile.class}${profile.section?(' • '+profile.section):''}`;
+      userEmailSmall.textContent = profile.email;
+      dayPicker.value = 'today';
+      loadDayView();
+    }
+
+    // Auth state persistence
     onAuthStateChanged(auth, (user)=>{
       if(user){
-        const saved = localStorage.getItem(`attenza_profile:${user.email}`);
+        // restore profile from local storage if exists
+        const saved = localStorage.getItem(uidLocalKey(user.email));
         if(saved){
           const profile = JSON.parse(saved);
-          CURRENT_USER = profile;
           showDashboardFor(profile);
         } else {
-          // keep auth card visible to import schedule
+          // show auth card so user can import schedule manually
           $('authCard').classList.remove('hidden');
           $('dashboard').classList.add('hidden');
         }
@@ -426,6 +596,15 @@
       }
     });
 
+    // set initial sync indicator
+    setSyncState(navigator.onLine);
+    window.addEventListener('online', ()=> setSyncState(true));
+    window.addEventListener('offline', ()=> setSyncState(false));
+
+    // Keyboard quick-submit on mobile for sign in from auth card
+    // (no additional handlers needed)
+
+    // END of module
   </script>
 </body>
 </html>
