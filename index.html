@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Attenza — Mobile Demo (Firebase Hybrid)</title>
+  <title>Attenza — Mobile Demo (Firebase Hybrid) - Fixed Remarks Modal</title>
 
   <!-- Mobile-first styles -->
   <style>
@@ -47,6 +47,8 @@
     .details{margin-top:8px;padding:10px;border-radius:10px;background:rgba(11,119,255,0.03);font-size:13px;color:var(--muted)}
     /* modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(6,10,20,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
+    /* ensure hidden reliably overrides display:flex */
+    .modal-backdrop.hidden { display: none !important; }
     .modal{width:92%;max-width:560px;border-radius:12px;padding:12px;background:var(--card)}
     .row{display:flex;gap:10px}
     .row > *{flex:1}
@@ -171,7 +173,7 @@
       </div>
     </div>
 
-    <!-- Remarks modal -->
+    <!-- Remarks modal (hidden by default) -->
     <div id="remarksModal" class="modal-backdrop hidden">
       <div class="modal">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -254,7 +256,7 @@
     let CURRENT_USER = null; // { uid, email, class, section }
     let MASTER_SCHEDULE = []; // full CSV (for debug)
     let CURRENT_DAY_ROWS = []; // filtered rows for current day
-    let pendingMark = null; // {row, status} used by remarks modal
+    let pendingMark = null; // {row, status, slotId} used by remarks modal
 
     // ---------- Utility functions ----------
     function parseCSV(text){
@@ -370,7 +372,8 @@
           try{
             setSyncState(navigator.onLine);
             await saveAttendance(CURRENT_USER.uid, dateISO, slotId, 'not_held', '');
-            badge.textContent = 'NOT HELD';
+            localStorage.setItem(`att_cache:${CURRENT_USER.uid}:${dateISO}:${slotId}`, JSON.stringify({status:'not_held', remark:''}));
+            loadDayView(); // refresh UI
           }catch(err){
             console.error(err);
             alert('Save failed');
@@ -383,8 +386,7 @@
         const details = document.createElement('div'); details.className='details hidden';
         details.innerHTML = `<div><strong>Class:</strong> ${r.class || ''} ${r.section?('• '+r.section):''}</div>
                              <div><strong>Faculty:</strong> ${r.faculty || ''}</div>
-                             <div style="margin-top:6px"><strong>Slot id:</strong> ${slotId}</div>
-                             <div style="margin-top:6px" id="badge-${slotId}">${badge.outerHTML}</div>`;
+                             <div style="margin-top:6px"><strong>Slot id:</strong> ${slotId}</div>`;
 
         // click-to-expand on main area
         main.onclick = ()=>{ details.classList.toggle('hidden'); };
@@ -408,16 +410,19 @@
     refreshBtn.addEventListener('click', ()=> loadDayView(true));
     historyBtn.addEventListener('click', ()=> { historyModal.classList.remove('hidden'); historyDate.value = new Date().toISOString().slice(0,10); loadHistory(); });
     closeHistory.addEventListener('click', ()=> historyModal.classList.add('hidden'));
-    closeRemarks.addEventListener('click', ()=> remarksModal.classList.add('hidden'));
+    closeRemarks.addEventListener('click', ()=> { pendingMark = null; remarksModal.classList.add('hidden'); });
     saveRemarkBtn.addEventListener('click', async ()=>{
       if(!pendingMark) return;
       const remark = remarkInput.value.trim();
       const dateISO = new Date().toISOString().slice(0,10);
       try{
         await saveAttendance(CURRENT_USER.uid, dateISO, pendingMark.slotId, pendingMark.status, remark);
-        // update local badge display quickly
+        // update local cache
         localStorage.setItem(`att_cache:${CURRENT_USER.uid}:${dateISO}:${pendingMark.slotId}`, JSON.stringify({status: pendingMark.status, remark}));
+        // hide modal and clear pendingMark
+        pendingMark = null;
         remarksModal.classList.add('hidden');
+        // refresh UI
         loadDayView();
       }catch(err){
         console.error(err);
@@ -426,8 +431,7 @@
     });
 
     editProfileBtn.addEventListener('click', async ()=>{
-      // quick profile edit: sign out and let user create/import again
-      alert('To change class/section, sign out and sign up again with new selection (demo).');
+      alert('To change class/section in this demo: sign out and sign up again with new selection.');
     });
 
     // ---------- Signup / Signin flow ----------
@@ -601,8 +605,8 @@
     window.addEventListener('online', ()=> setSyncState(true));
     window.addEventListener('offline', ()=> setSyncState(false));
 
-    // Keyboard quick-submit on mobile for sign in from auth card
-    // (no additional handlers needed)
+    // Ensure remarks modal hidden by default (safe guard)
+    remarksModal.classList.add('hidden');
 
     // END of module
   </script>
